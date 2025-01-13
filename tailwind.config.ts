@@ -11,7 +11,7 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        "theme-default": "#d2146e",
+        "theme-default": "#0fbab5",
       },
     },
   },

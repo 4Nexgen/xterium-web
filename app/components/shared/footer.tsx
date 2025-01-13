@@ -1,21 +1,21 @@
 import Link from "next/link";
-import Image from 'next/image';
+import Image from "next/image";
 
 export function Footer() {
   return (
     <div>
+      <div className="h-4 bg-gradient-to-r from-[#0eb4b2] to-[#10467b]"></div>
       <div className="bg-gray-800">
         <div className="container mx-auto text-white py-8">
           <div className="flex justify-between gap-4">
             <Link href="/" className="flex items-center">
               <Image
-                src="/xterium_logo.png"
+                src="/assets/xterium_logo-01.png"
                 alt="Xterium Logo"
-                width={40}
-                height={40} 
+                width={150}
+                height={40}
                 className="h-10 mr-3"
               />
-              <span className="text-3xl font-bold text-slate-500">Xterium</span>
             </Link>
             <ul className="flex items-center gap-4 text-slate-400 text-sm">
               <li>

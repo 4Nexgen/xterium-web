@@ -3,20 +3,22 @@ import Image from "next/image";
 
 export function Header() {
   return (
-    <nav className="bg-[#00000080] backdrop-blur-md">
+    <nav
+      style={{ backgroundImage: "url('/assets/xterium_bg-06.png')" }}
+      className="bg-no-repeat h-[168px] bg-contain"
+    >
       <div className="container mx-auto flex justify-between items-center py-4">
         <Link href="/" className="flex items-center">
           <Image
-            src="/xterium_logo.png"
+            src="/assets/XTERUIM_logo-02.png"
             alt="Xterium Logo"
-            width={40}
-            height={40} 
-            className="h-10 mr-3"
+            width={80}
+            height={80}
+            className="-ml-2 mt-10"
           />
-          <span className="text-3xl font-bold text-white">Xterium</span>
         </Link>
         <a
-          href="#"
+          href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
           className="text-theme-default border-2 border-theme-default py-2 px-4 rounded-full text-xs font-bold uppercase flex items-center gap-2"
         >
           <svg

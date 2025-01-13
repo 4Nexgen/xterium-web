@@ -3,14 +3,8 @@ import React from "react";
 export default function HomePage() {
   return (
     <div className="-mt-[70px]">
-      <section
-        className="bg-norepeat bg-cover relative"
-        style={{ backgroundImage: "url('/home-banner.webp')" }}
-      >
-        <div
-          className="bg-[#d2146e5e] backdrop-blur-sm pt-[70px] h-screen"
-          style={{ boxShadow: "inset 0 -20px 152px -26px #d2146e" }}
-        >
+      <section className="bg-norepeat bg-cover relative">
+        <div className="pt-[70px] h-screen">
           <div className="z-20 container mx-auto text-center flex flex-col justify-center items-center h-full">
             <h1 className="text-[4em] leading-none font-bold mb-6 text-white">
               Your Gateway to{" "}
@@ -26,32 +20,29 @@ export default function HomePage() {
               </h2>
             </div>
             <div className="flex items-center justify-center gap-4 mt-10">
-              <button className="bg-white text-theme-default py-4 px-6 rounded-full uppercase font-bold">
-                Download for Chrome
-              </button>
               <a
-                href="#"
-                className="text-white border-2 border-white py-4 px-6 rounded-full uppercase font-bold"
+                href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
+                className="text-white bg-gradient-to-br from-[#0eb4b2] to-[#10467b] py-4 px-6 rounded-full uppercase font-bold"
               >
-                Learn More
+                Download for Chrome
               </a>
             </div>
           </div>
         </div>
       </section>
-      <section className="py-16 bg-theme-default text-white">
+      <section className="py-16 bg-black text-white">
         <div className="container mx-auto">
           <h3 className="text-white uppercase font-bold text-lg mb-8">
             Why Choose Xterium Wallet?
           </h3>
           <ul className="flex">
-            <li className="p-4 flex-1 border-r border-[#ec4192]">
+            <li className="p-4 flex-1 border-r border-[#0fbab5]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
+                stroke="#b2ff79"
                 className="w-12 h-12 mb-2"
               >
                 <path
@@ -67,13 +58,13 @@ export default function HomePage() {
                 full control of your assets.
               </p>
             </li>
-            <li className="p-4 flex-1 border-r border-[#ec4192]">
+            <li className="p-4 flex-1 border-r border-[#0fbab5]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
+                stroke="#b2ff79"
                 className="w-12 h-12 mb-2"
               >
                 <path
@@ -88,13 +79,13 @@ export default function HomePage() {
                 Easily manage tokens with just a few clicks.
               </p>
             </li>
-            <li className="p-4 flex-1 border-r border-[#ec4192]">
+            <li className="p-4 flex-1 border-r border-[#0fbab5]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
+                stroke="#b2ff79"
                 className="w-12 h-12 mb-2"
               >
                 <path
@@ -116,7 +107,7 @@ export default function HomePage() {
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
+                stroke="#b2ff79"
                 className="w-12 h-12 mb-2"
               >
                 <path
@@ -166,7 +157,7 @@ export default function HomePage() {
         </div>
         {/* <div className="w-fit">
           <img src="/screen.png" alt="" className="w-[300px] rounded-xl" />
-        </div> */}
+          </div> */}
       </section>
     </div>
   );
