@@ -5,7 +5,7 @@ export function Header() {
   return (
     <nav
       style={{ backgroundImage: "url('/assets/xterium_bg-06.png')" }}
-      className="bg-no-repeat h-[168px] bg-contain"
+      className="bg-no-repeat h-[168px] bg-contain relative"
     >
       <div className="container mx-auto flex justify-between items-center py-4">
         <Link href="/" className="flex items-center">
@@ -14,12 +14,12 @@ export function Header() {
             alt="Xterium Logo"
             width={80}
             height={80}
-            className="-ml-2 mt-10"
+            className="absolute left-12 top-1/5 transform -translate-y-1/ sm:left-10 sm:top-1/3 md:left-12 md:top-1/4 lg:left-16 lg:top-1/4"
           />
         </Link>
         <a
           href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
-          className="text-theme-default border-2 border-theme-default py-2 px-4 rounded-full text-xs font-bold uppercase flex items-center gap-2"
+          className="text-theme-default border-2 border-theme-default py-2 px-4 rounded-full text-xs font-bold uppercase flex items-center gap-2 -ml-2 mt-10"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

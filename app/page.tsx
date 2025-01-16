@@ -1,10 +1,13 @@
 import React from "react";
+import WalletCreationSteps from "./components/shared/createWallet";
+import ImportWalletSteps from "./components/shared/importWallet";
+import TransferingTokenSteps from "./components/shared/transferringToken";
 
 export default function HomePage() {
   return (
-    <div className="-mt-[70px]">
-      <section className="bg-norepeat bg-cover relative">
-        <div className="pt-[70px] h-screen">
+    <div className="">
+      <section className="bg-no-repeat bg-cover relative" style={{ backgroundImage: "url('/assets/xterium_bg-09.png')" }}>
+        <div className="h-screen">
           <div className="z-20 container mx-auto text-center flex flex-col justify-center items-center h-full">
             <h1 className="text-[4em] leading-none font-bold mb-6 text-white">
               Your Gateway to{" "}
@@ -125,7 +128,8 @@ export default function HomePage() {
           </ul>
         </div>
       </section>
-      <section className="py-16 container mx-auto flex gap-8">
+      <section className="bg-no-repeat bg-cover relative" style={{ backgroundImage: "url('/assets/xterium_bg-09.png')" }}>
+      <div className="py-16 container mx-auto flex gap-8">
         <div className="flex-1">
           <h3 className="text-theme-default uppercase font-bold text-lg mb-8">
             Getting Started with Xterium Wallet
@@ -158,7 +162,13 @@ export default function HomePage() {
         {/* <div className="w-fit">
           <img src="/screen.png" alt="" className="w-[300px] rounded-xl" />
           </div> */}
+          </div>
       </section>
+      <div className="bg-black">
+        <WalletCreationSteps/>
+        <ImportWalletSteps/>
+        <TransferingTokenSteps />
+      </div>
     </div>
   );
 }

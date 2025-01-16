@@ -16,10 +16,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body
-        style={{ backgroundImage: "url('/assets/xterium_bg-05.png')" }}
-        className="bg-no-repeat bg-cover"
       >
-        <header className="sticky top-0 w-full z-30">
+        <header className="sticky top-0 w-full z-30 h-0">
           <Header />
         </header>
 
