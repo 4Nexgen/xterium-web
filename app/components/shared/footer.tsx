@@ -7,8 +7,8 @@ export function Footer() {
       <div className="h-4 bg-gradient-to-r from-[#0eb4b2] to-[#10467b]"></div>
       <div className="bg-gray-800">
         <div className="container mx-auto text-white py-8">
-          <div className="flex justify-between gap-4">
-            <Link href="/" className="flex items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:gap-4 lg:flex-row lg:justify-between lg:gap-4 items-center">
+            <Link href="/" className="flex items-center mb-4 sm:mb-0 lg:mb-0">
               <Image
                 src="/assets/xterium_logo-01.png"
                 alt="Xterium Logo"
@@ -17,7 +17,7 @@ export function Footer() {
                 className="h-10 mr-3"
               />
             </Link>
-            <ul className="flex items-center gap-4 text-slate-400 text-sm">
+            <ul className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-4 lg:flex-row lg:items-center lg:gap-4  text-slate-400 text-sm">
               <li>
                 <Link
                   href="/terms-and-conditions"
@@ -41,11 +41,11 @@ export function Footer() {
         </div>
       </div>
       <nav className="bg-black">
-        <div className="container py-4 mx-auto flex justify-between items-center">
+        <div className="container py-4 mx-auto flex flex-col sm:flex-row lg:flex-row justify-between items-center">
           <p className="footer-left text-white text-xs text-slate-400">
             © 2024 Xterium UI. All rights reserved.
           </p>
-          <p className="text-xs text-white">v1.0.0</p>
+          <p className="text-xs text-white mt-2 lg:mt-0">v1.0.0</p>
         </div>
       </nav>
     </div>

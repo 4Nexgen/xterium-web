@@ -74,7 +74,7 @@ export default function WalletCreationSteps() {
                       </span>
                     )
                   )}
-                  {description.includes("Important:") && (
+                  {description.includes("|") && (
                     <span className="text-yellow-500 font-bold">
                       <br />
                       <br />
