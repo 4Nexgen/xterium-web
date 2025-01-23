@@ -3,10 +3,10 @@ import React from "react";
 export default function TermsAndConditionsPage() {
   return (
     <div className="p-8 text-white">
-      <div className="policy-content">
+      <div className="policy-content mt-36">
         <div className="policy-details container mx-auto">
           <div className="mb-12">
-            <h4 className="text-3xl font-bold mb-8">Xterium Term Of Use</h4>
+            <h4 className="text-3xl font-bold mb-8 text-slate-400">Xterium Term Of Use</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               Welcome to Xterium! These Terms of Use (&quot;Terms&quot;) govern
               your use of our website [www.Xterium.net] (&quot;Website&quot;)
@@ -17,7 +17,7 @@ export default function TermsAndConditionsPage() {
             </p>
           </div>
           <div className="mb-12">
-            <h4 className="font-bold">1. User Eligibility</h4>
+            <h4 className="font-bold text-slate-400">1. User Eligibility</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               You must be at least 13 years old to use this Website. By using
               the Website, you represent and warrant that you are at least 13
@@ -25,7 +25,7 @@ export default function TermsAndConditionsPage() {
             </p>
           </div>
           <div className="mb-12">
-            <h4 className="font-bold">2. Use of the Website</h4>
+            <h4 className="font-bold text-slate-400">2. Use of the Website</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               2.1. License: Subject to these Terms, we grant you a limited,
               non-exclusive, non-transferable, and revocable license to use the
@@ -65,7 +65,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="mb-12">
-            <h4 className="font-bold">3. User-Generated Content</h4>
+            <h4 className="font-bold text-slate-400">3. User-Generated Content</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               3.1. Submission of Content: By submitting content (such as
               comments, reviews, or contributions) to the Website, you grant us
@@ -81,7 +81,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="mb-12">
-            <h4 className="font-bold">4. Privacy</h4>
+            <h4 className="font-bold text-slate-400">4. Privacy</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               Our{" "}
               <a
@@ -97,7 +97,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="mb-12">
-            <h4 className="font-bold">5. Third-Party Links</h4>
+            <h4 className="font-bold text-slate-400">5. Third-Party Links</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               The Website may contain links to third-party websites. We do not
               endorse or assume any responsibility for the content, privacy
@@ -106,7 +106,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="mb-12">
-            <h4 className="font-bold">6. Disclaimer of Warranties</h4>
+            <h4 className="font-bold text-slate-400">6. Disclaimer of Warranties</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               The Website is provided &quot;as is&quot; and &quot;as
               available&quot; without warranties of any kind, either express or
@@ -117,7 +117,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="mb-12">
-            <h4 className="font-bold">7. Limitation of Liability</h4>
+            <h4 className="font-bold text-slate-400">7. Limitation of Liability</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               In no event shall Xterium, its officers, directors, employees, or
               agents be liable for any indirect, consequential, special,
@@ -127,7 +127,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="mb-12">
-            <h4 className="font-bold">8. Governing Law and Jurisdiction</h4>
+            <h4 className="font-bold text-slate-400">8. Governing Law and Jurisdiction</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               These Terms are governed by and construed in accordance with the
               laws of [Jurisdiction], without regard to its conflict of law
@@ -136,7 +136,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="mb-12">
-            <h4 className="font-bold">9. Changes to the Terms</h4>
+            <h4 className="font-bold text-slate-400">9. Changes to the Terms</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               We may update these Terms from time to time for legal or
               regulatory reasons. The date of the latest revision will be

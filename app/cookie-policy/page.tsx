@@ -3,11 +3,11 @@ import React from "react";
 export default function CookiePolicyPage() {
   return (
     <div className="p-8 text-white">
-      <div className="policy-content">
+      <div className="policy-content mt-36">
         <div className="policy-details container mx-auto">
-          <h4 className="text-3xl font-bold mb-8">Xterium Cookie Policy</h4>
+          <h4 className="text-3xl font-bold mb-8 text-slate-400">Xterium Cookie Policy</h4>
           <div className="mb-8">
-            <h4 className="font-bold uppercase underline">Introduction</h4>
+            <h4 className="font-bold uppercase underline text-slate-400">Introduction</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               Welcome to Xterium! This Cookie Policy explains how Xterium
               (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) uses cookies
@@ -25,7 +25,7 @@ export default function CookiePolicyPage() {
           </div>
 
           <div className="mb-8">
-            <h4 className="font-bold uppercase underline">What are Cookies?</h4>
+            <h4 className="font-bold uppercase underline text-slate-400">What are Cookies?</h4>
             <p className="text-lg mt-2 text-gray-400 text-justify">
               Cookies are small text files that are placed on your computer or
               mobile device by a website when you visit it. They are widely used
@@ -35,10 +35,10 @@ export default function CookiePolicyPage() {
           </div>
 
           <div className="mb-8">
-            <h4 className="font-bold text-2xl mb-8">Types of Cookies We Use</h4>
+            <h4 className="font-bold text-2xl mb-8 text-slate-400">Types of Cookies We Use</h4>
 
             <div className="mb-6">
-              <h4 className="font-bold uppercase underline">
+              <h4 className="font-bold uppercase underline text-slate-400">
                 Essential Cookies
               </h4>
               <p className="text-lg mt-2 text-gray-400 text-justify">
@@ -51,7 +51,7 @@ export default function CookiePolicyPage() {
             </div>
 
             <div className="mb-6">
-              <h4 className="font-bold uppercase underline">
+              <h4 className="font-bold uppercase underline text-slate-400">
                 Analytical/Performance Cookies
               </h4>
               <p className="text-lg mt-2 text-gray-400 text-justify">
@@ -64,7 +64,7 @@ export default function CookiePolicyPage() {
             </div>
 
             <div className="mb-6">
-              <h4 className="font-bold uppercase underline">
+              <h4 className="font-bold uppercase underline text-slate-400">
                 Functionality Cookies
               </h4>
               <p className="text-lg mt-2 text-gray-400 text-justify">
@@ -76,7 +76,7 @@ export default function CookiePolicyPage() {
             </div>
 
             <div className="mb-6">
-              <h4 className="font-bold uppercase underline">
+              <h4 className="font-bold uppercase underline text-slate-400">
                 Targeting Cookies
               </h4>
               <p className="text-lg mt-2 text-gray-400 text-justify">
@@ -89,7 +89,7 @@ export default function CookiePolicyPage() {
             </div>
 
             <div className="mb-6">
-              <h4 className="font-bold uppercase underline">
+              <h4 className="font-bold uppercase underline text-slate-400">
                 Third-Party Cookies
               </h4>
               <p className="text-lg mt-2 text-gray-400 text-justify">
@@ -102,7 +102,7 @@ export default function CookiePolicyPage() {
             </div>
 
             <div className="mb-6">
-              <h4 className="font-bold uppercase underline">
+              <h4 className="font-bold uppercase underline text-slate-400">
                 How to Manage Cookies
               </h4>
               <p className="text-lg mt-2 text-gray-400 text-justify">
@@ -115,7 +115,7 @@ export default function CookiePolicyPage() {
             </div>
 
             <div className="mb-6">
-              <h4 className="font-bold uppercase underline">
+              <h4 className="font-bold uppercase underline text-slate-400">
                 Changes to this Cookie Policy
               </h4>
               <p className="text-lg mt-2 text-gray-400 text-justify">

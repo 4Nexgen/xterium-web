@@ -3,10 +3,10 @@ import React from "react";
 export default function PrivacyPolicyPage() {
   return (
     <div className="p-8 text-white">
-      <div className="policy-content">
+      <div className="policy-content mt-36">
         <div className="policy-details container mx-auto">
           <div className="mb-8">
-            <h4 className="font-bold underline">GENERAL</h4>
+            <h4 className="font-bold underline text-slate-400">GENERAL</h4>
             <p className="text-lg mt-4 text-justify text-slate-400">
               Xterium and its affiliates (also collectively referred to as
               “Company”, “we”, “our”, and “us”) established this Data Privacy
@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className="mb-8 ">
-            <h4 className="font-bold underline">APPLICABILITY</h4>
+            <h4 className="font-bold underline text-slate-400">APPLICABILITY</h4>
             <p className="text-lg mt-4 text-justify text-slate-400">
               This Data Privacy Policy applies to Personal Information we
               collect on our Xterium websites. We have prepared this Privacy
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className="mb-8">
-            <h4 className="font-bold underline">
+            <h4 className="font-bold underline text-slate-400 text-justify">
               PROCESSING OF INFORMATION BY THIRD-PARTY AND LINKS TO OTHER
               WEBSITES
             </h4>
