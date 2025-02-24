@@ -6,7 +6,13 @@ import TransferingTokenSteps from "./components/shared/transferringToken";
 export default function HomePage() {
   return (
     <div className="">
-      <section className="bg-no-repeat bg-cover relative" style={{ backgroundImage: "url('/assets/xterium_bg-09.png')" }}>
+      <section className="bg-no-repeat bg-cover relative" 
+        style={{ 
+          backgroundImage: "url('/assets/xterium_bg-09.png')" ,
+          backgroundSize: "cover",
+          backgroundPosition: "top",
+          backgroundAttachment: "fixed"
+      }}>
         <div className="h-screen mx-2">
           <div className="z-20 container mx-auto text-center flex flex-col justify-center items-center pt-16 h-full">
           <h1 className="text-[4em] leading-tight font-bold mb-6 text-white">
@@ -126,7 +132,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-no-repeat bg-cover relative" style={{ backgroundImage: "url('/assets/xterium_bg-09.png')" }}>
+      <section className="bg-no-repeat bg-cover relative" 
+        style={{ 
+          backgroundImage: "url('/assets/xterium_bg-09.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "top",
+          backgroundAttachment: "fixed"
+        }}>
       <div className="py-16 container mx-auto flex gap-8">
         <div className="flex-1 mx-2">
         <h3 className="text-theme-default uppercase font-bold text-lg mb-8 mx-2 text-left xs:text-center">
