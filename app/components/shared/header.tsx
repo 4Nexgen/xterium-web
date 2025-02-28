@@ -1,10 +1,8 @@
-
 import Link from "next/link";
 import Image from "next/image";
 import XteriumWallet from "./xterium-wallet";
 
 export function Header() {
- 
   return (
     <nav
       style={{ backgroundImage: "url('/assets/xterium_bg-06.png')" }}
@@ -41,7 +39,7 @@ export function Header() {
             </svg>
             <span className="hidden sm:inline">Download</span>
           </a>
-          <XteriumWallet/>
+          <XteriumWallet />
         </div>
       </div>
     </nav>
