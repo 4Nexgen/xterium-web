@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { connectXteriumWallet } from "./xterium-wallet";
 
 export function Header() {
   return (
@@ -37,6 +38,25 @@ export function Header() {
           </svg>
           <span className="hidden sm:inline">Download</span>
         </a>
+      </div>
+      <div className="container mx-auto flex justify-between items-center py-4">
+        <ul className="flex items-center">
+          <li className="flex items-center justify-between p-4 my-1 cursor-pointer hover:bg-[#121212] hover:bg-opacity-10 dark:hover:bg-[#313131]" onClick={connectXteriumWallet}>
+            <button type="button" className="btn btn-wallet w-full">
+              <div className="text-theme-default border-2 border-theme-default py-2 px-4 rounded-full text-xs font-bold uppercase flex items-center gap-2 -ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3">
+                <Image
+                  className="img-fluid"
+                  src="/assets/icon.png"
+                  alt="Xterium Wallet"
+                  width={46}
+                  height={46}
+                />
+                <span className="hidden sm:inline">Xterium Wallet</span>
+              </div>
+              <i className="icon-arrow-right text-base"></i>
+            </button>
+          </li>
+        </ul>
       </div>
     </nav>
   );
