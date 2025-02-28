@@ -23,13 +23,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
           data-embed-id="ddfb456b8dfe2dee5e4d64debf3ecf096645fda973f5b5ff39b883cfd5fee6bd"
           data-virtual-assistant-id="679c777e947013d228ddda78"
           data-websocket-url="wss://sme-api.imur.ai/api/llm/connect-socket/"
-          data-theme-accent-bg-color="#CD156B"
+          data-theme-accent-bg-color="#0fbab5"
           data-theme-accent-text-color="#FFFFFF"
-          data-theme-body-bg-color="#f9f9f9"
-          data-user-bubble-bg-color="#CD156B"
+          data-theme-body-bg-color="#0fbab5"
+          data-user-bubble-bg-color="#0fbab5"
           data-user-bubble-text-color="#FFFFFF"
-          data-assistant-text-color="#333333"
-          data-send-button-bg-color="#CD156B"
+          data-assistant-text-color="#000000"
+          data-send-button-bg-color="#0fbab5"
         ></Script>
         </div>
         <header className="sticky top-0 w-full z-30 h-0">
