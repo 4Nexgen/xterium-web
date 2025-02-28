@@ -167,35 +167,40 @@ const XteriumWallet = () => {
 
         {isWalletVisible && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
-            <div className="bg-white rounded-lg p-10 shadow-lg max-w-md w-full">
-              <h2 className="text-2xl font-bold text-center mb-6">
-                Connect Your Wallet
-              </h2>
-              <div className="flex flex-col items-center mb-8 w-full">
+            <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
+              <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
+                <h2 className="text-xl font-bold flex-grow text-center">Xterium</h2>
                 <button
-                  onClick={connectXteriumWallet}
-                  className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-lg w-full px-6 py-4 transition duration-300 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-md hover:shadow-lg"
+                  className="text-gray-600 hover:text-gray-800"
+                  onClick={handleCloseWallet}
                 >
-                  <Image
-                    className="img-fluid mr-3"
-                    src="/assets/icon.png"
-                    alt="Xterium Wallet"
-                    width={40}
-                    height={40}
-                  />
-                  Xterium Wallet
+                  <i className="icon-close">X</i>
                 </button>
               </div>
-              <p className="text-gray-700 text-center mb-6 text-sm">
-                By connecting your wallet, you can access all the features of
-                our platform seamlessly.
-              </p>
-              <button
-                onClick={handleCloseWallet}
-                className="mt-4 bg-red-500 text-white rounded-lg px-6 py-2 transition duration-300 hover:bg-red-700 flex items-center justify-center w-full focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-opacity-50"
-              >
-                Close
-              </button>
+              <div className="p-10">
+                <h2 className="text-2xl font-bold text-center mb-6">
+                  Connect Your Wallet
+                </h2>
+                <div className="flex flex-col items-center mb-8 w-full">
+                  <button
+                    onClick={connectXteriumWallet}
+                    className="flex items-center bg-gray-200 text-gray-800 rounded-lg w-full px-6 py-4 transition duration-300 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-md hover:shadow-lg"
+                  >
+                    <Image
+                      className="img-fluid mr-3"
+                      src="/assets/icon.png"
+                      alt="Xterium Wallet"
+                      width={40}
+                      height={40}
+                    />
+                    Xterium Wallet
+                  </button>
+                </div>
+                <p className="text-gray-700 text-center mb-6 text-sm">
+                  By connecting your wallet, you can access all the features of
+                  our platform seamlessly.
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -204,9 +209,15 @@ const XteriumWallet = () => {
       {isModalVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-8 shadow-lg max-w-md w-full">
-            <h3 className="text-2xl font-bold mb-4 text-center">
-              Connected Wallet:
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold">Connected Wallet:</h3>
+              <button
+                className="text-gray-600 hover:text-gray-800"
+                onClick={() => setIsModalVisible(false)}
+              >
+                <i className="icon-close">X</i>
+              </button>
+            </div>
             {walletAccounts.length > 0 && (
               <div
                 className="container border-2 border-gray-300 p-6 rounded-lg cursor-pointer hover:bg-gray-100 transition duration-200"
@@ -223,12 +234,6 @@ const XteriumWallet = () => {
                 </p>
               </div>
             )}
-            <button
-              onClick={() => setIsModalVisible(false)}
-              className="mt-6 bg-red-500 text-white rounded-lg px-6 py-3 hover:bg-red-600 transition duration-200 w-full"
-            >
-              Close
-            </button>
           </div>
         </div>
       )}
