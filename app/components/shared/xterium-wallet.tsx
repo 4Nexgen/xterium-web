@@ -21,11 +21,14 @@ type WalletData = {
   type?: string;
 };
 
-const XteriumWallet = () => {
+type XteriumWalletProps = {
+  setConnectedWallet: React.Dispatch<React.SetStateAction<Wallet | null>>;
+};
+
+const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => {
   const [walletAccounts, setWalletAccounts] = useState<Wallet[]>([]);
-  const [isWalletSelected, setIsWalletSelected] = useState<boolean>(false);
   const [isWalletVisible, setIsWalletVisible] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
+  const [isModalVisible, setIsModalVisible] = useState(false); 
 
   const handleButtonClick = () => {
     setIsWalletVisible(true);
@@ -38,6 +41,14 @@ const XteriumWallet = () => {
   const connectXteriumWallet = () => {
     console.log("Connecting to Xterium Wallet...");
     window.postMessage({ type: "XTERIUM_GET_WALLETS" }, "*");
+  };
+
+  const disconnectWallet = () => {
+    console.log("Disconnecting from Xterium Wallet...");
+    setConnectedWallet(null); 
+    window.xterium.isConnected = false; 
+    window.xterium.connectedWallet = null; 
+    window.xterium.saveConnectionState(); 
   };
 
   const handleExtensionMessage = useCallback((event: MessageEvent) => {
@@ -83,8 +94,11 @@ const XteriumWallet = () => {
                   type: connectedWallet.type ?? undefined,
                 },
               ]);
-              setIsWalletSelected(true);
-              setIsModalVisible(true); // Show modal when wallet is connected
+              setConnectedWallet({
+                public_key: connectedWallet.public_key,
+                name: connectedWallet.name ?? connectedWallet.public_key.substring(0, 6),
+              });
+              setIsModalVisible(true);
               return;
             }
 
@@ -106,8 +120,11 @@ const XteriumWallet = () => {
                     type: wallet.type ?? undefined,
                   },
                 ]);
-                setIsWalletSelected(true);
-                setIsModalVisible(true); // Show modal when wallet is connected
+                setConnectedWallet({
+                  public_key: wallet.public_key,
+                  name: wallet.name ?? wallet.public_key.substring(0, 6),
+                });
+                setIsModalVisible(true); 
               })
               .catch((err: Error) => {
                 console.error("Error selecting wallet:", err);
@@ -140,7 +157,14 @@ const XteriumWallet = () => {
           console.log("Approval UI shown successfully.");
         })
         .catch((error) => {
-          console.error("Error showing approval UI:", error);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          
+          if (errorMessage.includes("User  cancelled wallet connection")) {
+            console.warn("User  cancelled wallet connection.");
+            alert("Wallet connection was cancelled. Please try again.");
+          } else {
+            console.error("Error showing approval UI:", error);
+          }
         });
     } else {
       console.warn("Xterium approval UI is not available.");
@@ -151,15 +175,37 @@ const XteriumWallet = () => {
     <div className="">
       <div className="container mx-auto flex justify-between items-center">
         <ul className="flex items-center">
-          <li className="flex items-center justify-between p-1 my-1 cursor-pointer hover:bg-[#121212] hover:bg-opacity-10 dark:hover:bg-[#313131]">
+          <li className="flex items-center justify-between my-1 cursor-pointer ">
             <button
               type="button"
               className="btn btn-wallet w-full"
               onClick={handleButtonClick}
             >
-              <div className="text-theme-default border-2 border-theme-default py-2 px-4 rounded-full text-xs font-bold uppercase flex items-center gap-2 -ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3">
-                <span className="hidden sm:inline">Connect Wallet</span>
+              <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
+                <span className="hidden sm:inline p-4 text-center">Connect Wallet</span>
                 <i className="icon-arrow-right text-base"></i>
+              </div>
+            </button>
+          </li>
+          <li className="flex items-center justify-between my-1 cursor-pointer ">
+            <button
+              type="button"
+              className="btn btn-transfer w-full"
+              onClick={() => console.log("Transfer clicked")}
+            >
+              <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
+                <span className="hidden sm:inline p-4 text-center">Transfer</span>
+              </div>
+            </button>
+          </li>
+          <li className="flex items-center justify-between my-1 cursor-pointer ">
+            <button
+              type="button"
+              className="btn btn-disconnect w-full"
+              onClick={disconnectWallet}
+            >
+              <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
+                <span className="hidden sm:inline p-4 text-center">Disconnect</span>
               </div>
             </button>
           </li>
@@ -174,7 +220,7 @@ const XteriumWallet = () => {
                   className="text-gray-600 hover:text-gray-800"
                   onClick={handleCloseWallet}
                 >
-                  <i className="icon-close">X</i>
+                  <i className="icon-close" style={{ fontWeight: 'bold', fontStyle: 'normal' }}>X</i>
                 </button>
               </div>
               <div className="p-10">
@@ -207,33 +253,37 @@ const XteriumWallet = () => {
       </div>
 
       {isModalVisible && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-8 shadow-lg max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-2xl font-bold">Connected Wallet:</h3>
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
+          <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
+            <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
+              <h2 className="text-xl font-bold flex-grow text-center">Xterium</h2>
               <button
                 className="text-gray-600 hover:text-gray-800"
                 onClick={() => setIsModalVisible(false)}
               >
-                <i className="icon-close">X</i>
-              </button>
+                <i className="icon-close" style={{ fontWeight: 'bold', fontStyle: 'normal' }}>X</i>
+            </button>
             </div>
-            {walletAccounts.length > 0 && (
-              <div
-                className="container border-2 border-gray-300 p-6 rounded-lg cursor-pointer hover:bg-gray-100 transition duration-200"
-                onClick={handleShowConnectApprovalUI}
-              >
-                <p className="text-lg">
-                  <strong>Name:</strong> {walletAccounts[0].name}
-                </p>
-                <p className="text-lg">
-                  <strong>Address:</strong>{" "}
-                  {walletAccounts[0].public_key.substring(0, 6) +
-                    "..." +
-                    walletAccounts[0].public_key.slice(-6)}
-                </p>
-              </div>
-            )}
+            <div className="flex justify-center items-center mt-10">
+              <h3 className="text-2xl font-bold text-center">Connected Wallet</h3>
+            </div>
+            <div className="pt-5 pb-16 pl-5 pr-5 mb-16">
+              {walletAccounts.length > 0 && (
+                <div
+                  className="container border-2 border-gray-300 p-6 rounded-lg cursor-pointer hover:bg-gray-100 transition duration-200"
+                  onClick={handleShowConnectApprovalUI}
+                >
+                  <p className="text-lg font-bold text-center">
+                    {walletAccounts[0].name}
+                    <span className="ml-2"> 
+                      {walletAccounts[0].public_key.substring(0, 6) +
+                        "..." +
+                        walletAccounts[0].public_key.slice(-6)}
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

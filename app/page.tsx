@@ -1,9 +1,37 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import WalletCreationSteps from "./components/shared/createWallet";
 import ImportWalletSteps from "./components/shared/importWallet";
 import TransferingTokenSteps from "./components/shared/transferringToken";
+import XteriumWallet from "./components/shared/xterium-wallet";
+
+type Wallet = {
+  public_key: string;
+  name?: string;
+};
 
 export default function HomePage() {
+  const [connectedWallet, setConnectedWallet] = useState<Wallet | null>(null); // State to hold connected wallet information
+  
+  useEffect(() => {
+    const savedConnectionState = localStorage.getItem("xterium_wallet_connection");
+    if (savedConnectionState) {
+      const connectionData = JSON.parse(savedConnectionState);
+      if (connectionData.isConnected) {
+        setConnectedWallet(connectionData.connectedWallet);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const connectionData = {
+      isConnected: !!connectedWallet,
+      connectedWallet: connectedWallet,
+    };
+    localStorage.setItem("xterium_wallet_connection", JSON.stringify(connectionData));
+  }, [connectedWallet]);
+  
   return (
     <div className="">
       <section className="bg-no-repeat bg-cover relative" 
@@ -37,6 +65,26 @@ export default function HomePage() {
                 Download for Chrome
               </a>
             </div>
+          </div>
+        </div>
+      </section>
+      <XteriumWallet setConnectedWallet={setConnectedWallet} />
+      <section className="py-6 bg-none flex justify-center items-center">
+        <div className="container border-2 border-gray-300 rounded-lg p-2">
+          <h3 className="uppercase font-bold text-lg mb-8 mx-4">
+            Connected Wallet
+          </h3>
+          <div className="bg-gray-100 p-4 rounded"> 
+            {connectedWallet && (
+              <p className="text-lg font-bold text-center">
+                {connectedWallet.name}
+                <span className="ml-2">
+                  {connectedWallet.public_key.substring(0, 6) +
+                    "..." +
+                    connectedWallet.public_key.slice(-6)}
+                </span>
+              </p>
+            )}
           </div>
         </div>
       </section>
