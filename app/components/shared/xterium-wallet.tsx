@@ -44,6 +44,10 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
     setIsWalletVisible(false);
   };
 
+  const handleCloseTransfer = () => {
+    setIsTransferVisible(false);
+  };
+
   const connectXteriumWallet = () => {
     console.log("Connecting to Xterium Wallet...");
     window.postMessage({ type: "XTERIUM_GET_WALLETS" }, "*");
@@ -91,46 +95,41 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
               setWalletAccounts([
                 {
                   public_key: connectedWallet.public_key,
-                  name:
-                    connectedWallet.name ??
-                    connectedWallet.public_key.substring(0, 6),
-                  metaGenesisHash: connectedWallet.metaGenesisHash ?? undefined,
-                  tokenSymbol: connectedWallet.tokenSymbol ?? undefined,
-                  metaSource: connectedWallet.metaSource ?? undefined,
-                  type: connectedWallet.type ?? undefined,
+                  name: connectedWallet.name ?? connectedWallet.public_key.substring(0, 6),
                 },
               ]);
               setConnectedWallet({
                 public_key: connectedWallet.public_key,
                 name: connectedWallet.name ?? connectedWallet.public_key.substring(0, 6),
               });
-              setIsModalVisible(true);
               return;
             }
 
             window.xterium
               .showConnectPrompt(validWallets)
               .then((wallet: WalletData) => {
-                window.xterium.isConnected = true;
-                window.xterium.connectedWallet = wallet;
-                window.xterium.saveConnectionState();
-                console.log("[Xterium] Connected wallet:", wallet.public_key);
+                window.xterium.showConnectApprovalUI(wallet)
+                  .then(() => {
+                    window.xterium.isConnected = true;
+                    window.xterium.connectedWallet = wallet;
+                    window.xterium.saveConnectionState();
+                    console.log("[Xterium] Connected wallet:", wallet.public_key);
 
-                setWalletAccounts([
-                  {
-                    public_key: wallet.public_key,
-                    name: wallet.name ?? wallet.public_key.substring(0, 6),
-                    metaGenesisHash: wallet.metaGenesisHash ?? undefined,
-                    tokenSymbol: wallet.tokenSymbol ?? undefined,
-                    metaSource: wallet.metaSource ?? undefined,
-                    type: wallet.type ?? undefined,
-                  },
-                ]);
-                setConnectedWallet({
-                  public_key: wallet.public_key,
-                  name: wallet.name ?? wallet.public_key.substring(0, 6),
-                });
-                setIsModalVisible(true); 
+                    setWalletAccounts([
+                      {
+                        public_key: wallet.public_key,
+                        name: wallet.name ?? wallet.public_key.substring(0, 6),
+                      },
+                    ]);
+                    setConnectedWallet({
+                      public_key: wallet.public_key,
+                      name: wallet.name ?? wallet.public_key.substring(0, 6),
+                    });
+                    setIsModalVisible(true);
+                  })
+                  .catch((err: Error) => {
+                    console.error("Approval UI rejected:", err);
+                  });
               })
               .catch((err: Error) => {
                 console.error("Error selecting wallet:", err);
@@ -146,7 +145,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
       default:
         break;
     }
-  }, []);
+  }, [setConnectedWallet]);
 
   useEffect(() => {
     window.addEventListener("message", handleExtensionMessage);
@@ -295,7 +294,15 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
       {isTransferVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
           <div className="bg-white rounded-lg p-4 shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4 text-center">Transfer Tokens</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-bold mb-4 text-center flex-grow">Transfer Tokens</h3>
+            <button
+              className="text-gray-600 hover:text-gray-800 pb-3"
+              onClick={handleCloseTransfer}
+            >
+              <i className="icon-close" style={{ fontWeight: 'bold', fontStyle: 'normal' }}>X</i>
+            </button>
+          </div>
             <hr className="border-gray-500 mb-4" />
             <form onSubmit={handleTransfer}>
               <div className="mb-4">
