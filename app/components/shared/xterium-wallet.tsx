@@ -29,6 +29,12 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
   const [walletAccounts, setWalletAccounts] = useState<Wallet[]>([]);
   const [isWalletVisible, setIsWalletVisible] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false); 
+  const [isTransferVisible, setIsTransferVisible] = useState(false); 
+
+  const [recipient, setRecipient] = useState("");
+  const [amount, setAmount] = useState("");
+  const [token, setToken] = useState("Native"); 
+  const [password, setPassword] = useState("");
 
   const handleButtonClick = () => {
     setIsWalletVisible(true);
@@ -171,6 +177,40 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
     }
   };
 
+  const handleTransfer = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!recipient || !amount || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    window.xterium.showTransferApprovalUI({
+      token: { symbol: token }, 
+      recipient,
+      value: amount,
+      fee: "Calculating...", 
+    })
+    .then(() => {
+      window.xterium.transferInternal(
+        { symbol: token }, 
+        recipient,
+        amount,
+        password
+      )
+      .then((response) => {
+        console.log("Transfer successful:", response);
+        setIsTransferVisible(false);
+      })
+      .catch((error) => {
+        console.error("Transfer failed:", error);
+      });
+    })
+    .catch((error) => {
+      console.error("Approval UI rejected:", error);
+    });
+  };
+
   return (
     <div className="">
       <div className="container mx-auto flex justify-between items-center">
@@ -191,7 +231,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
             <button
               type="button"
               className="btn btn-transfer w-full"
-              onClick={() => console.log("Transfer clicked")}
+              onClick={() => setIsTransferVisible(true)}
             >
               <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
                 <span className="hidden sm:inline p-4 text-center">Transfer</span>
@@ -251,6 +291,62 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
           </div>
         )}
       </div>
+
+      {isTransferVisible && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
+          <div className="bg-white rounded-lg p-4 shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4 text-center">Transfer Tokens</h3>
+            <hr className="border-gray-500 mb-4" />
+            <form onSubmit={handleTransfer}>
+              <div className="mb-4">
+                <label className="block text-l font-medium">Recipient Address</label>
+                <input
+                  type="text"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  className="border border-gray-400 rounded-md p-2 bg-transparent w-full font-bold"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-l font-medium">Amount</label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="border border-gray-400 rounded-md p-2  bg-transparent w-full font-bold"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-l font-medium ">Token</label>
+                <select
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  className="border border-gray-400 rounded-md p-2  bg-transparent w-full font-bold"
+                >
+                  <option value="Native">Native</option>
+                  {/* Add more token options as needed */}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-l font-medium ">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="border border-gray-400 rounded-md p-2  bg-transparent w-full font-bold"
+                  required
+                />
+              </div>
+              <div className="flex justify-between">
+                <button type="submit" className="inject-button">Submit Transfer</button>
+                <button type="button" className="inject-cancel-button" onClick={() => setIsTransferVisible(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {isModalVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">

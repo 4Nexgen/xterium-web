@@ -8,15 +8,23 @@ interface Wallet {
   type?: string;
 }
 
+interface TransferResponse {
+  success: boolean;
+  transactionId?: string; 
+  message?: string;
+}
+
 interface Xterium {
   extensionId: string;
   isXterium: boolean;
   isConnected: boolean;
   connectedWallet: Wallet | null;
   showExtension: () => void;
-  showConnectPrompt: (wallets: Wallet[]) => Promise<Wallet>; // Accepts an array of wallets and returns a promise
-  showConnectApprovalUI: (wallet: Wallet) => Promise<void>; // Add this line
-  saveConnectionState: () => void; // Ensure this method exists
+  showConnectPrompt: (wallets: Wallet[]) => Promise<Wallet>;
+  showConnectApprovalUI: (wallet: Wallet) => Promise<void>;
+  showTransferApprovalUI: (details: { token: { symbol: string }; recipient: string; value: string; fee: string }) => Promise<void>; // Add this line
+  transferInternal: (token: { symbol: string }, recipient: string, value: string, password: string) => Promise<TransferResponse>; // Updated line
+  saveConnectionState: () => void;
 }
 
 interface Window {
