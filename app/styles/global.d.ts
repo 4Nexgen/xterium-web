@@ -22,6 +22,7 @@ interface Xterium {
   showExtension: () => void;
   showConnectPrompt: (wallets: Wallet[]) => Promise<Wallet>;
   showConnectApprovalUI: (wallet: Wallet) => Promise<void>;
+  showSuccessMessage:() =>void;
   showTransferApprovalUI: (details: { token: { symbol: string }; recipient: string; value: string; fee: string }) => Promise<void>; // Add this line
   transferInternal: (token: { symbol: string }, recipient: string, value: string, password: string) => Promise<TransferResponse>; // Updated line
   saveConnectionState: () => void;

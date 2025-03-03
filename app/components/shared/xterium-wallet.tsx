@@ -27,21 +27,22 @@ type XteriumWalletProps = {
 
 const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => {
   const [walletAccounts, setWalletAccounts] = useState<Wallet[]>([]);
-  const [isWalletVisible, setIsWalletVisible] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false); 
+  const [isConnectWalletVisible, setIsConnectWalletVisible] = useState(false);
   const [isTransferVisible, setIsTransferVisible] = useState(false); 
+  const [isConnectedWalletsVisible, setIsConnectedWalletsVisible] = useState(false); // New state for connected wallets modal
 
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [token, setToken] = useState("Native"); 
   const [password, setPassword] = useState("");
+  const isConnected = window.xterium?.isConnected;
 
   const handleButtonClick = () => {
-    setIsWalletVisible(true);
+    setIsConnectWalletVisible(true);
   };
 
   const handleCloseWallet = () => {
-    setIsWalletVisible(false);
+    setIsConnectWalletVisible(false);
   };
 
   const handleCloseTransfer = () => {
@@ -108,28 +109,15 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
             window.xterium
               .showConnectPrompt(validWallets)
               .then((wallet: WalletData) => {
-                window.xterium.showConnectApprovalUI(wallet)
-                  .then(() => {
-                    window.xterium.isConnected = true;
-                    window.xterium.connectedWallet = wallet;
-                    window.xterium.saveConnectionState();
-                    console.log("[Xterium] Connected wallet:", wallet.public_key);
-
-                    setWalletAccounts([
-                      {
-                        public_key: wallet.public_key,
-                        name: wallet.name ?? wallet.public_key.substring(0, 6),
-                      },
-                    ]);
-                    setConnectedWallet({
-                      public_key: wallet.public_key,
-                      name: wallet.name ?? wallet.public_key.substring(0, 6),
-                    });
-                    setIsModalVisible(true);
-                  })
-                  .catch((err: Error) => {
-                    console.error("Approval UI rejected:", err);
-                  });
+                setWalletAccounts([
+                  {
+                    public_key: wallet.public_key,
+                    name: wallet.name ?? wallet.public_key.substring(0, 6),
+                  },
+                ]);
+                setIsConnectedWalletsVisible(true);
+                setIsConnectWalletVisible(false); // Show connected wallets modal
+                
               })
               .catch((err: Error) => {
                 console.error("Error selecting wallet:", err);
@@ -155,26 +143,65 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
   }, [handleExtensionMessage]);
 
   const handleShowConnectApprovalUI = () => {
-    if (window.xterium && window.xterium.showConnectApprovalUI) {
-      window.xterium
-        .showConnectApprovalUI(walletAccounts[0])
-        .then(() => {
-          console.log("Approval UI shown successfully.");
-        })
-        .catch((error) => {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          
-          if (errorMessage.includes("User  cancelled wallet connection")) {
-            console.warn("User  cancelled wallet connection.");
-            alert("Wallet connection was cancelled. Please try again.");
-          } else {
-            console.error("Error showing approval UI:", error);
-          }
+  if (!walletAccounts || walletAccounts.length === 0) {
+    console.error("No wallet accounts found.");
+    alert("No wallet accounts available. Please connect a wallet first.");
+    return;
+  }
+
+  const selectedWallet = walletAccounts[0];
+
+  if (!selectedWallet) {
+    console.error("Selected wallet is undefined.");
+    alert("Selected wallet is unavailable. Please reconnect.");
+    return;
+  }
+
+  if (!selectedWallet.public_key) {
+    console.error("Connected wallet does not have a public_key.");
+    alert("Your wallet does not have a valid public key. Please try again.");
+    return;
+  }
+
+  if (window.xterium?.showConnectApprovalUI) {
+    window.xterium
+      .showConnectApprovalUI(selectedWallet)
+      .then(() => {
+        if (!selectedWallet?.public_key) {
+          console.error("Connected wallet does not have a public_key after approval.");
+          return;
+        }
+
+        window.xterium.isConnected = true;
+        window.xterium.connectedWallet = selectedWallet;
+        window.xterium.saveConnectionState();
+        console.log("[Xterium] Connected wallet:", selectedWallet.public_key);
+
+        setConnectedWallet({
+          public_key: selectedWallet.public_key,
+          name: selectedWallet.name ?? selectedWallet.public_key.substring(0, 6),
         });
-    } else {
-      console.warn("Xterium approval UI is not available.");
-    }
-  };
+        setIsConnectedWalletsVisible(false);
+
+        if (window.xterium.showSuccessMessage) {
+          window.xterium.showSuccessMessage();
+        } else {
+          console.warn("showSuccessMessage function is not available.");
+        }
+      })
+      .catch((error) => {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes("User cancelled wallet connection")) {
+          console.warn("User cancelled wallet connection.");
+          alert("Wallet connection was cancelled. Please try again.");
+        }
+      });
+  } else {
+    console.warn("Xterium approval UI is not available.");
+  }
+};
+
+  
 
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,6 +246,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
               type="button"
               className="btn btn-wallet w-full"
               onClick={handleButtonClick}
+              disabled={isConnected}
             >
               <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
                 <span className="hidden sm:inline p-4 text-center">Connect Wallet</span>
@@ -250,7 +278,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
           </li>
         </ul>
 
-        {isWalletVisible && (
+        {isConnectWalletVisible && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
             <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
               <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
@@ -355,17 +383,17 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
         </div>
       )}
 
-      {isModalVisible && (
+      {isConnectedWalletsVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
           <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
             <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
               <h2 className="text-xl font-bold flex-grow text-center">Xterium</h2>
               <button
                 className="text-gray-600 hover:text-gray-800"
-                onClick={() => setIsModalVisible(false)}
+                onClick={() => setIsConnectedWalletsVisible(false)}
               >
                 <i className="icon-close" style={{ fontWeight: 'bold', fontStyle: 'normal' }}>X</i>
-            </button>
+              </button>
             </div>
             <div className="flex justify-center items-center mt-10">
               <h3 className="text-2xl font-bold text-center">Connected Wallet</h3>
@@ -390,6 +418,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
           </div>
         </div>
       )}
+
     </div>
   );
 };
