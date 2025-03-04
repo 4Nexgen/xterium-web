@@ -1,4 +1,5 @@
 // src/types/global.d.ts
+
 interface Wallet {
   public_key: string;
   name?: string;
@@ -10,7 +11,7 @@ interface Wallet {
 
 interface TransferResponse {
   success: boolean;
-  transactionId?: string; 
+  transactionId?: string;
   message?: string;
 }
 
@@ -22,11 +23,37 @@ interface Xterium {
   showExtension: () => void;
   showConnectPrompt: (wallets: Wallet[]) => Promise<Wallet>;
   showConnectApprovalUI: (wallet: Wallet) => Promise<void>;
-  showSuccessMessage:() =>void;
-  showTransferApprovalUI: (details: { token: { symbol: string }; recipient: string; value: string; fee: string }) => Promise<void>; // Add this line
-  transferInternal: (token: { symbol: string }, recipient: string, value: string, password: string) => Promise<TransferResponse>; // Updated line
+  showTransferApprovalUI(details: {
+    token: { symbol: string };
+    recipient: string;
+    value: string;
+    fee: string;
+  }): Promise<string>;
+  transferInternal: (token: { symbol: string }, recipient: string, value: string, password: string) => Promise<TransferResponse>;
+  transfer: (
+    token: { symbol: string },
+    recipient: string,
+    value: string,
+    password: string
+  ) => Promise<TransferResponse>;
   saveConnectionState: () => void;
+  getEstimateFee: (
+    owner: string,
+    value: number,
+    recipient: string,
+    balance: { token: { symbol: string; type: string } }
+  ) => Promise<{ partialFee: string }>;
+  fixBalance: (value: any, decimal?: number) => number;
+  showSuccessMessage?: (wallet: Wallet) => void;
+  getWallets: () => Promise<string[]>;
+  getTokenInfo: (tokenSymbol: string) => {
+    tokenObj: { symbol: string; type: string } & Partial<Wallet>;
+    detectedInfo: string;
+  };
+  updateTokenIndicator?: (detectedInfo: string) => void;
 }
+
+
 
 interface Window {
   xterium: Xterium;
