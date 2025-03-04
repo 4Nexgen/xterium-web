@@ -29,7 +29,12 @@ interface Xterium {
     value: string;
     fee: string;
   }): Promise<string>;
-  transferInternal: (token: { symbol: string }, recipient: string, value: string, password: string) => Promise<TransferResponse>;
+  transferInternal: (
+    token: { symbol: string },
+    recipient: string,
+    value: string,
+    password: string
+  ) => Promise<TransferResponse>;
   transfer: (
     token: { symbol: string },
     recipient: string,
@@ -43,18 +48,18 @@ interface Xterium {
     recipient: string,
     balance: { token: { symbol: string; type: string } }
   ) => Promise<{ partialFee: string }>;
-  fixBalance: (value: any, decimal?: number) => number;
+  fixBalance: (value: number | string, decimal?: number) => number;
   showSuccessMessage?: (wallet: Wallet) => void;
   getWallets: () => Promise<string[]>;
   getTokenInfo: (tokenSymbol: string) => {
     tokenObj: { symbol: string; type: string } & Partial<Wallet>;
     detectedInfo: string;
   };
+  getTokenList: () => Promise<XteriumToken[]>;
   updateTokenIndicator?: (detectedInfo: string) => void;
 }
-
-
 
 interface Window {
   xterium: Xterium;
 }
+
