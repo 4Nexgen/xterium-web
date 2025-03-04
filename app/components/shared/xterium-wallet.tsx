@@ -295,86 +295,109 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
 
   return (
     <div className="">
-      <div className="container mx-auto flex justify-between items-center">
-        <ul className="flex items-center">
-          <li className="flex items-center justify-between my-1 cursor-pointer">
-            <button type="button" className="btn btn-wallet w-full" onClick={handleButtonClick}>
-              <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
-                <span className="hidden sm:inline p-4 text-center">Connect Wallet</span>
-                <i className="icon-arrow-right text-base"></i>
-              </div>
-            </button>
-            {showAlreadyConnectedPopup && (
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 mt-10">
+  <ul className="flex flex-col md:flex-row items-center w-full md:w-auto space-y-4 md:space-y-0 md:space-x-4">
+    {/* Connect Wallet Button */}
+    <li className="w-full md:w-auto cursor-pointer">
+      <button
+        type="button"
+        className="btn btn-wallet w-full md:w-auto"
+        onClick={handleButtonClick}
+      >
+        <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center justify-center gap-2 p-3 md:p-4 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
+          <span className="p-2 text-center">Connect Wallet</span>
+          <i className="icon-arrow-right text-base"></i>
+        </div>
+      </button>
+      {showAlreadyConnectedPopup && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded shadow-lg z-50">
           Wallet already connected
         </div>
       )}
-          </li>
-          <li className="flex items-center justify-between my-1 cursor-pointer">
-          <button
-              type="button"
-              className="btn btn-transfer w-full"
-              onClick={() => {
-                if (!window.xterium?.isConnected) {
-                  setPopupMessage("No wallet connected");
-                  setIsPopupVisible(true);
-                  setTimeout(() => setIsPopupVisible(false), 1500);
-                } else {
-                  setIsTransferVisible(true);
-                }
-              }}
-            >
-              <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
-                <span className="hidden sm:inline p-4 text-center">Transfer</span>
-              </div>
-            </button>
-            {isPopupVisible && (
-            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded shadow-lg z-50">
-              {popupMessage}
-            </div>
-          )}
-          </li>
-          <li className="flex items-center justify-between my-1 cursor-pointer">
-            <button type="button" className="btn btn-disconnect w-full" onClick={disconnectWallet}>
-              <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
-                <span className="hidden sm:inline p-4 text-center">Disconnect</span>
-              </div>
-            </button>
-          </li>
-        </ul>
+    </li>
 
-        {isConnectWalletVisible && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
-            <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
-              <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
-                <h2 className="text-xl font-bold flex-grow text-center">Xterium</h2>
-                <button className="text-gray-600 hover:text-gray-800" onClick={handleCloseWallet}>
-                  <i className="icon-close" style={{ fontWeight: "bold", fontStyle: "normal" }}>X</i>
-                </button>
-              </div>
-              <div className="p-10">
-                <h2 className="text-2xl font-bold text-center mb-6">Connect Your Wallet</h2>
-                <div className="flex flex-col items-center mb-8 w-full">
-                  {(isWalletLoading || isWalletSelecting) ? (
-                    <Spinner />
-                  ) : (
-                    <button
-                      onClick={connectXteriumWallet}
-                      className="flex items-center bg-gray-200 text-gray-800 rounded-lg w-full px-6 py-4 transition duration-300 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-md hover:shadow-lg"
-                    >
-                      <Image className="img-fluid mr-3" src="/assets/icon.png" alt="Xterium Wallet" width={40} height={40} />
-                      Xterium Wallet
-                    </button>
-                  )}
-                </div>
-                <p className="text-gray-700 text-center mb-6 text-sm">
-                  By connecting your wallet, you can access all the features of our platform seamlessly.
-                </p>
-              </div>
-            </div>
+    {/* Transfer Button */}
+    <li className="w-full md:w-auto cursor-pointer">
+      <button
+        type="button"
+        className="btn btn-transfer w-full md:w-auto"
+        onClick={() => {
+          if (!window.xterium?.isConnected) {
+            setPopupMessage("No wallet connected");
+            setIsPopupVisible(true);
+            setTimeout(() => setIsPopupVisible(false), 1500);
+          } else {
+            setIsTransferVisible(true);
+          }
+        }}
+      >
+        <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center justify-center gap-2 p-3 md:p-4 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
+          <span className="p-2 text-center">Transfer</span>
+        </div>
+      </button>
+      {isPopupVisible && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded shadow-lg z-50">
+          {popupMessage}
+        </div>
+      )}
+    </li>
+
+    {/* Disconnect Button */}
+    <li className="w-full md:w-auto cursor-pointer">
+      <button
+        type="button"
+        className="btn btn-disconnect w-full md:w-auto"
+        onClick={disconnectWallet}
+      >
+        <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center justify-center gap-2 p-3 md:p-4 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
+          <span className="p-2 text-center">Disconnect</span>
+        </div>
+      </button>
+    </li>
+  </ul>
+
+  {/* Connect Wallet Modal */}
+  {isConnectWalletVisible && (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
+      <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
+        <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
+          <h2 className="text-xl font-bold flex-grow text-center">Xterium</h2>
+          <button
+            className="text-gray-600 hover:text-gray-800"
+            onClick={handleCloseWallet}
+          >
+            <i className="icon-close" style={{ fontWeight: "bold", fontStyle: "normal" }}>X</i>
+          </button>
+        </div>
+        <div className="p-10">
+          <h2 className="text-2xl font-bold text-center mb-6">Connect Your Wallet</h2>
+          <div className="flex flex-col items-center mb-8 w-full">
+            {isWalletLoading || isWalletSelecting ? (
+              <Spinner />
+            ) : (
+              <button
+                onClick={connectXteriumWallet}
+                className="flex items-center bg-gray-200 text-gray-800 rounded-lg w-full px-6 py-4 transition duration-300 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-md hover:shadow-lg"
+              >
+                <Image
+                  className="img-fluid mr-3"
+                  src="/assets/icon.png"
+                  alt="Xterium Wallet"
+                  width={40}
+                  height={40}
+                />
+                Xterium Wallet
+              </button>
+            )}
           </div>
-        )}
+          <p className="text-gray-700 text-center mb-6 text-sm">
+            By connecting your wallet, you can access all the features of our platform seamlessly.
+          </p>
+        </div>
       </div>
+    </div>
+  )}
+</div>
 
       {isTransferVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
