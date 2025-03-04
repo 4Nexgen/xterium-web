@@ -43,7 +43,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const [isApprovalLoading, setIsApprovalLoading] = useState(false);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
-  const isConnected = window.xterium?.isConnected;
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsConnected(window.xterium?.isConnected || false);
+    }
+  }, []);
 
   const handleButtonClick = () => {
     if (isConnected) {
@@ -150,11 +156,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                       name: wallet.name ?? wallet.public_key.substring(0, 6),
                     },
                   ]);
-                  setConnectedWallet({
-                    public_key: wallet.public_key,
-                    name: wallet.name ?? wallet.public_key.substring(0, 6),
-                  });
-                  window.xterium.connectedWallet = wallet;
                   setIsConnectedWalletsVisible(true);
                   setIsConnectWalletVisible(false);
                 })
@@ -202,16 +203,23 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       alert("Your wallet does not have a valid public key. Please try again.");
       return;
     }
-    if (window.xterium && window.xterium.showConnectApprovalUI) {
+    if (window.xterium?.showConnectApprovalUI) {
       setIsApprovalLoading(true);
       window.xterium
         .showConnectApprovalUI(walletAccounts[0])
         .then(() => {
-          console.log("Approval UI shown successfully.");
+          if (!walletAccounts[0]?.public_key) {
+            console.error("Connected wallet does not have a public_key after approval.");
+            return;
+          }
           window.xterium.isConnected = true;
           window.xterium.saveConnectionState();
           setIsApprovalLoading(false);
           window.xterium.showSuccessMessage?.(walletAccounts[0]);
+          setConnectedWallet({
+            public_key: walletAccounts[0].public_key,
+            name: walletAccounts[0].name ?? walletAccounts[0].public_key.substring(0, 6),
+          });
           setIsConnectedWalletsVisible(false);
         })
         .catch((error: Error) => {
@@ -220,8 +228,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           if (errorMessage.includes("cancelled")) {
             console.warn("User cancelled wallet connection.");
             setIsConnectedWalletsVisible(false);
-          } else {
-            console.error("Error showing approval UI:", error);
           }
           setIsApprovalLoading(false);
         });
@@ -239,9 +245,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         console.log("Fetched token list:", tokenList);
         const foundToken = Array.isArray(tokenList)
           ? tokenList.find(
-              (t: XteriumToken) =>
-                t.symbol.toUpperCase() === value.trim().toUpperCase()
-            )
+            (t: XteriumToken) =>
+              t.symbol.toUpperCase() === value.trim().toUpperCase()
+          )
           : null;
         if (foundToken) {
           setDetectedTokenType(`Detected as: ${foundToken.type}`);
@@ -304,6 +310,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       alert("Please fill in all required fields.");
       return;
     }
+
     (window.xterium as Xterium)
       .showTransferApprovalUI({
         token: { symbol: token },
@@ -312,20 +319,38 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         fee: estimatedFee || "Calculating...",
       })
       .then((approvedPassword: string) => {
+        // Show transferring animation
+        const transferringOverlay = (window.xterium as any).showTransferringAnimation();
+
         (window.xterium as Xterium)
           .transfer({ symbol: token }, recipient, amount, approvedPassword)
           .then((response: TransferResponse) => {
             console.log("Transfer successful:", response);
-            setIsTransferVisible(false);
+
+            // Update animation to success
+            (window.xterium as any).updateTransferringAnimationToSuccess(transferringOverlay);
+
+            // Close UI and clear input fields after 1 second
+            setTimeout(() => {
+              setIsTransferVisible(false);
+              document.body.removeChild(transferringOverlay); // Ensure overlay is removed
+
+              // Reset input fields
+              setRecipient("");
+              setAmount("");
+              setToken("");
+            }, 1000);
           })
           .catch((error: Error) => {
             console.error("Transfer failed:", error);
+            alert("Transfer failed. Please try again.");
           });
       })
       .catch((error: Error) => {
         console.error("Approval UI rejected:", error);
       });
   };
+
 
   const Spinner = () => (
     <div className="flex items-center justify-center py-4">
