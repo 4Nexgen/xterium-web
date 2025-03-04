@@ -19,9 +19,11 @@ type XteriumWalletProps = {
 
 const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => {
   const [walletAccounts, setWalletAccounts] = useState<Wallet[]>([]);
-  const [isWalletVisible, setIsWalletVisible] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTransferVisible, setIsTransferVisible] = useState(false);
+  const [isConnectWalletVisible, setIsConnectWalletVisible] = useState(false);
+  const [isConnectedWalletsVisible, setIsConnectedWalletsVisible] = useState(false); // New state for connected wallets modal
+  const [showAlreadyConnectedPopup, setShowAlreadyConnectedPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
@@ -36,13 +38,20 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
   const [isWalletSelecting, setIsWalletSelecting] = useState(false);
   const [isApprovalLoading, setIsApprovalLoading] = useState(false);
   const [approvalSuccess, setApprovalSuccess] = useState(false);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const isConnected = window.xterium?.isConnected;
 
   const handleButtonClick = () => {
-    setIsWalletVisible(true);
+    if (isConnected) {
+      setShowAlreadyConnectedPopup(true);
+      setTimeout(() => setShowAlreadyConnectedPopup(false), 1000);
+    } else {
+      setIsConnectWalletVisible(true);
+    }
   };
 
   const handleCloseWallet = () => {
-    setIsWalletVisible(false);
+    setIsConnectWalletVisible(false);
     setIsWalletLoading(false);
     setIsWalletSelecting(false);
   };
@@ -58,11 +67,17 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
   };
 
   const disconnectWallet = () => {
-    console.log("Disconnecting from Xterium Wallet...");
-    setConnectedWallet(null);
-    window.xterium.isConnected = false;
-    window.xterium.connectedWallet = null;
-    window.xterium.saveConnectionState();
+    if (!window.xterium?.isConnected) {
+      setPopupMessage("There's no wallet connected");
+    } else {
+      setConnectedWallet(null);
+      window.xterium.isConnected = false;
+      window.xterium.connectedWallet = null;
+      window.xterium.saveConnectionState();
+      setPopupMessage("Wallet disconnected");
+    }
+    setIsPopupVisible(true);
+    setTimeout(() => setIsPopupVisible(false), 1000);
   };
 
   const handleExtensionMessage = useCallback((event: MessageEvent) => {
@@ -125,7 +140,8 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
                   name: wallet.name ?? wallet.public_key.substring(0, 6),
                 });
                 window.xterium.connectedWallet = wallet;
-                setIsModalVisible(true);
+                setIsConnectedWalletsVisible(true);
+                setIsConnectWalletVisible(false); // Show connected wallets modal
               })
               .catch((err: Error) => {
                 setIsWalletSelecting(false);
@@ -153,6 +169,23 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
 
   // When showing the approval UI, call showSuccessMessage and close the modal.
   const handleShowConnectApprovalUI = () => {
+    if (!walletAccounts || walletAccounts.length === 0) {
+      console.error("No wallet accounts found.");
+      alert("No wallet accounts available. Please connect a wallet first.");
+      return;
+    }
+  
+    if (!walletAccounts[0]) {
+      console.error("Selected wallet is undefined.");
+      alert("Selected wallet is unavailable. Please reconnect.");
+      return;
+    }
+  
+    if (!walletAccounts[0].public_key) {
+      console.error("Connected wallet does not have a public_key.");
+      alert("Your wallet does not have a valid public key. Please try again.");
+      return;
+    }
     if (window.xterium && window.xterium.showConnectApprovalUI) {
       setIsApprovalLoading(true);
       window.xterium
@@ -162,14 +195,14 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
           window.xterium.isConnected = true;
           window.xterium.saveConnectionState();
           setIsApprovalLoading(false);
-          setApprovalSuccess(true);
           window.xterium.showSuccessMessage?.(walletAccounts[0]);
-          setIsModalVisible(false);
+          setIsConnectedWalletsVisible(false);
         })
         .catch((error) => {
           const errorMessage = error instanceof Error ? error.message : String(error);
           if (errorMessage.includes("cancelled")) {
             console.warn("User cancelled wallet connection.");
+            setIsConnectedWalletsVisible(false);
           } else {
             console.error("Error showing approval UI:", error);
           }
@@ -258,14 +291,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
     </div>
   );
 
-  const ConnectedAnimation = () => (
-    <div className="flex flex-col items-center justify-center">
-      <svg className="w-16 h-16 text-green-500 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 6L9 17l-5-5" />
-      </svg>
-      <p className="text-green-500 font-bold mt-2">Connected Successfully</p>
-    </div>
-  );
+  
 
   return (
     <div className="">
@@ -278,13 +304,35 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
                 <i className="icon-arrow-right text-base"></i>
               </div>
             </button>
+            {showAlreadyConnectedPopup && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded shadow-lg z-50">
+          Wallet already connected
+        </div>
+      )}
           </li>
           <li className="flex items-center justify-between my-1 cursor-pointer">
-            <button type="button" className="btn btn-transfer w-full" onClick={() => setIsTransferVisible(true)}>
+          <button
+              type="button"
+              className="btn btn-transfer w-full"
+              onClick={() => {
+                if (!window.xterium?.isConnected) {
+                  setPopupMessage("No wallet connected");
+                  setIsPopupVisible(true);
+                  setTimeout(() => setIsPopupVisible(false), 1500);
+                } else {
+                  setIsTransferVisible(true);
+                }
+              }}
+            >
               <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center gap-2 ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
                 <span className="hidden sm:inline p-4 text-center">Transfer</span>
               </div>
             </button>
+            {isPopupVisible && (
+            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded shadow-lg z-50">
+              {popupMessage}
+            </div>
+          )}
           </li>
           <li className="flex items-center justify-between my-1 cursor-pointer">
             <button type="button" className="btn btn-disconnect w-full" onClick={disconnectWallet}>
@@ -295,7 +343,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
           </li>
         </ul>
 
-        {isWalletVisible && (
+        {isConnectWalletVisible && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
             <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
               <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
@@ -388,12 +436,12 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
         </div>
       )}
 
-      {isModalVisible && (
+      {isConnectedWalletsVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
           <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
             <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
               <h2 className="text-xl font-bold flex-grow text-center">Xterium</h2>
-              <button className="text-gray-600 hover:text-gray-800" onClick={() => setIsModalVisible(false)}>
+              <button className="text-gray-600 hover:text-gray-800" onClick={() => setIsConnectedWalletsVisible(false)}>
                 <i className="icon-close" style={{ fontWeight: "bold", fontStyle: "normal" }}>X</i>
               </button>
             </div>
@@ -408,8 +456,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({ setConnectedWallet }) => 
                 >
                   {isApprovalLoading ? (
                     <Spinner />
-                  ) : approvalSuccess ? (
-                    <ConnectedAnimation />
                   ) : (
                     <p className="text-lg font-bold text-center">
                       {walletAccounts[0].name}

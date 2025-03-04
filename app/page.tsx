@@ -74,9 +74,9 @@ export default function HomePage() {
           <h3 className="uppercase font-bold text-lg mb-8 mx-4">
             Connected Wallet
           </h3>
-          <div className="bg-gray-100 p-4 rounded"> 
-            {connectedWallet && (
-              <p className="text-lg font-bold text-center">
+          <div className="bg-gray-100 p-4 rounded text-center"> 
+            {connectedWallet ? (
+              <p className="text-lg font-bold">
                 {connectedWallet.name}
                 <span className="ml-2">
                   {connectedWallet.public_key.substring(0, 6) +
@@ -84,6 +84,8 @@ export default function HomePage() {
                     connectedWallet.public_key.slice(-6)}
                 </span>
               </p>
+            ) : (
+              <p className="text-lg font-bold text-gray-500">No wallet connected</p>
             )}
           </div>
         </div>
