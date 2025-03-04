@@ -209,7 +209,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         .showConnectApprovalUI(walletAccounts[0])
         .then(() => {
           if (!walletAccounts[0]?.public_key) {
-            console.error("Connected wallet does not have a public_key after approval.");
+            console.error(
+              "Connected wallet does not have a public_key after approval."
+            );
             return;
           }
           window.xterium.isConnected = true;
@@ -218,7 +220,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           window.xterium.showSuccessMessage?.(walletAccounts[0]);
           setConnectedWallet({
             public_key: walletAccounts[0].public_key,
-            name: walletAccounts[0].name ?? walletAccounts[0].public_key.substring(0, 6),
+            name:
+              walletAccounts[0].name ??
+              walletAccounts[0].public_key.substring(0, 6),
           });
           setIsConnectedWalletsVisible(false);
         })
@@ -245,9 +249,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         console.log("Fetched token list:", tokenList);
         const foundToken = Array.isArray(tokenList)
           ? tokenList.find(
-            (t: XteriumToken) =>
-              t.symbol.toUpperCase() === value.trim().toUpperCase()
-          )
+              (t: XteriumToken) =>
+                t.symbol.toUpperCase() === value.trim().toUpperCase()
+            )
           : null;
         if (foundToken) {
           setDetectedTokenType(`Detected as: ${foundToken.type}`);
@@ -319,23 +323,19 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         fee: estimatedFee || "Calculating...",
       })
       .then((approvedPassword: string) => {
-        // Show transferring animation
-        const transferringOverlay = (window.xterium as any).showTransferringAnimation();
-
+        const transferringOverlay = window.xterium.showTransferringAnimation();
         (window.xterium as Xterium)
           .transfer({ symbol: token }, recipient, amount, approvedPassword)
           .then((response: TransferResponse) => {
             console.log("Transfer successful:", response);
 
-            // Update animation to success
-            (window.xterium as any).updateTransferringAnimationToSuccess(transferringOverlay);
-
-            // Close UI and clear input fields after 1 second
+            window.xterium.updateTransferringAnimationToSuccess(
+              transferringOverlay
+            );
             setTimeout(() => {
               setIsTransferVisible(false);
-              document.body.removeChild(transferringOverlay); // Ensure overlay is removed
+              document.body.removeChild(transferringOverlay);
 
-              // Reset input fields
               setRecipient("");
               setAmount("");
               setToken("");
@@ -350,7 +350,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         console.error("Approval UI rejected:", error);
       });
   };
-
 
   const Spinner = () => (
     <div className="flex items-center justify-center py-4">
@@ -376,7 +375,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     <div className="">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 mt-10">
         <ul className="flex flex-col md:flex-row items-center w-full md:w-auto space-y-4 md:space-y-0 md:space-x-4">
-          {/* Connect Wallet Button */}
           <li className="w-full md:w-auto cursor-pointer">
             <button
               type="button"
@@ -395,7 +393,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             )}
           </li>
 
-          {/* Transfer Button */}
           <li className="w-full md:w-auto cursor-pointer">
             <button
               type="button"
@@ -421,7 +418,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             )}
           </li>
 
-          {/* Disconnect Button */}
           <li className="w-full md:w-auto cursor-pointer">
             <button
               type="button"
@@ -435,7 +431,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           </li>
         </ul>
 
-        {/* Connect Wallet Modal */}
         {isConnectWalletVisible && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
             <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
@@ -621,4 +616,3 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 };
 
 export default XteriumWallet;
-

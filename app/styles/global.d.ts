@@ -57,9 +57,11 @@ interface Xterium {
   };
   getTokenList: () => Promise<XteriumToken[]>;
   updateTokenIndicator?: (detectedInfo: string) => void;
+
+  showTransferringAnimation: () => HTMLElement;
+  updateTransferringAnimationToSuccess: (overlay: HTMLElement) => void;
 }
 
 interface Window {
   xterium: Xterium;
 }
-
