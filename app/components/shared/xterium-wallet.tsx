@@ -154,7 +154,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
               setIsWalletSelecting(true);
               window.xterium
-                .showConnectPrompt(validWallets)
+                .showSelectWalletToConnect(validWallets)
                 .then((wallet: WalletData) => {
                   setIsWalletSelecting(false);
                   setWalletAccounts([
@@ -210,10 +210,10 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       alert("Your wallet does not have a valid public key. Please try again.");
       return;
     }
-    if (window.xterium?.showConnectApprovalUI) {
+    if (window.xterium?.showConnectWalletSignAndVerify) {
       setIsApprovalLoading(true);
       window.xterium
-        .showConnectApprovalUI(walletAccounts[0])
+        .showConnectWalletSignAndVerify(walletAccounts[0])
         .then(() => {
           if (!walletAccounts[0]?.public_key) {
             console.error(
@@ -224,7 +224,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           window.xterium.isConnected = true;
           window.xterium.saveConnectionState();
           setIsApprovalLoading(false);
-          window.xterium.showSuccessMessage?.(walletAccounts[0]);
+          window.xterium.showSuccessConnectWalletMessage?.(walletAccounts[0]);
           setConnectedWallet({
             public_key: walletAccounts[0].public_key,
             name:
@@ -336,20 +336,20 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
 
     (window.xterium as Xterium)
-      .showTransferApprovalUI({
+      .showTransferSignAndVerify({
         token: { symbol: token },
         recipient,
         value: amount,
         fee: estimatedFee || "Calculating...",
       })
       .then((approvedPassword: string) => {
-        const transferringOverlay = window.xterium.showTransferringAnimation();
+        const transferringOverlay = window.xterium.showTransferProcessing();
         (window.xterium as Xterium)
           .transfer({ symbol: token }, recipient, amount, approvedPassword)
           .then((response: TransferResponse) => {
             console.log("Transfer successful:", response);
 
-            window.xterium.updateTransferringAnimationToSuccess(
+            window.xterium.showTransferSuccess(
               transferringOverlay
             );
             setTimeout(() => {
