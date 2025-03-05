@@ -317,14 +317,18 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   }, [recipient, amount, token]);
 
   const handleTransferModalOpen = async () => {
-    setIsTransferVisible(true);
-    if (window.xterium && window.xterium.getTokenList) {
+    if (window.xterium.isConnected == true) {
       try {
-        const tokens = await window.xterium.getTokenList();
-        setTokenList(tokens);
+        if (window.xterium.getTokenList) {
+          const tokens = await window.xterium.getTokenList();
+          setTokenList(tokens);
+        }
+        setIsTransferVisible(true);
       } catch (error) {
         console.error("Error fetching token list:", error);
       }
+    } else {
+      console.warn("Wallet is not connected. Cannot open transfer modal.");
     }
   };
 
