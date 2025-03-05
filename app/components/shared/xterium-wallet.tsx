@@ -42,7 +42,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const [isWalletSelecting, setIsWalletSelecting] = useState(false);
   const [isApprovalLoading, setIsApprovalLoading] = useState(false);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-
+  const [tokenList, setTokenList] = useState<
+    { symbol: string; description: string }[]
+  >([]);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -68,6 +70,11 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
   const handleCloseTransfer = () => {
     setIsTransferVisible(false);
+    setRecipient("");
+    setAmount("");
+    setToken("");
+    setDetectedTokenType("");
+    setEstimatedFee("");
   };
 
   const connectXteriumWallet = () => {
@@ -85,6 +92,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       window.xterium.connectedWallet = null;
       window.xterium.saveConnectionState();
       setPopupMessage("Wallet disconnected");
+      window.location.reload();
     }
     setIsPopupVisible(true);
     setTimeout(() => setIsPopupVisible(false), 1000);
@@ -96,7 +104,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
       switch (event.data.type) {
         case "XTERIUM_WALLETS_RESPONSE":
-          console.log("Wallets response:", event.data);
           try {
             let wallets: WalletData[] = event.data.wallets;
             if (typeof wallets === "string") {
@@ -225,6 +232,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
               walletAccounts[0].public_key.substring(0, 6),
           });
           setIsConnectedWalletsVisible(false);
+          window.location.reload();
         })
         .catch((error: Error) => {
           const errorMessage =
@@ -240,32 +248,32 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
   };
 
-  const handleTokenChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setToken(value);
-    if (window.xterium && window.xterium.getTokenList) {
-      try {
-        const tokenList = await window.xterium.getTokenList();
-        console.log("Fetched token list:", tokenList);
-        const foundToken = Array.isArray(tokenList)
-          ? tokenList.find(
-              (t: XteriumToken) =>
-                t.symbol.toUpperCase() === value.trim().toUpperCase()
-            )
-          : null;
-        if (foundToken) {
-          setDetectedTokenType(`Detected as: ${foundToken.type}`);
-        } else {
-          setDetectedTokenType("Default: Native");
-        }
-      } catch (error) {
-        console.error("Error fetching token list:", error);
-        setDetectedTokenType("Error fetching token list, defaulting to Native");
-      }
-    } else {
-      setDetectedTokenType("Token list not available, defaulting to Native");
-    }
-  };
+  // const handleTokenChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   setToken(value);
+  //   if (window.xterium && window.xterium.getTokenList) {
+  //     try {
+  //       const tokenList = await window.xterium.getTokenList();
+  //       // console.log("Fetched token list:", tokenList);
+  //       const foundToken = Array.isArray(tokenList)
+  //         ? tokenList.find(
+  //             (t: XteriumToken) =>
+  //               t.symbol.toUpperCase() === value.trim().toUpperCase()
+  //           )
+  //         : null;
+  //       if (foundToken) {
+  //         setDetectedTokenType(`Detected as: ${foundToken.type}`);
+  //       } else {
+  //         setDetectedTokenType("Default: Native");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching token list:", error);
+  //       setDetectedTokenType("Error fetching token list, defaulting to Native");
+  //     }
+  //   } else {
+  //     setDetectedTokenType("Token list not available, defaulting to Native");
+  //   }
+  // };
 
   useEffect(() => {
     if (recipient && amount && token && window.xterium) {
@@ -308,6 +316,18 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
   }, [recipient, amount, token]);
 
+  const handleTransferModalOpen = async () => {
+    setIsTransferVisible(true);
+    if (window.xterium && window.xterium.getTokenList) {
+      try {
+        const tokens = await window.xterium.getTokenList();
+        setTokenList(tokens);
+      } catch (error) {
+        console.error("Error fetching token list:", error);
+      }
+    }
+  };
+
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!recipient || !amount || !token) {
@@ -339,6 +359,8 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
               setRecipient("");
               setAmount("");
               setToken("");
+
+              window.location.reload();
             }, 1000);
           })
           .catch((error: Error) => {
@@ -397,15 +419,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             <button
               type="button"
               className="btn btn-transfer w-full md:w-auto"
-              onClick={() => {
-                if (!window.xterium?.isConnected) {
-                  setPopupMessage("No wallet connected");
-                  setIsPopupVisible(true);
-                  setTimeout(() => setIsPopupVisible(false), 1500);
-                } else {
-                  setIsTransferVisible(true);
-                }
-              }}
+              onClick={handleTransferModalOpen}
             >
               <div className="text-theme-default border-2 border-theme-default rounded-xl text-xs font-bold uppercase flex items-center justify-center gap-2 p-3 md:p-4 cursor-pointer hover:bg-opacity-10 dark:hover:bg-[#313131]">
                 <span className="p-2 text-center">Transfer</span>
@@ -483,86 +497,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         )}
       </div>
 
-      {isTransferVisible && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
-          <div className="bg-white rounded-lg p-4 shadow-lg max-w-md w-full">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold mb-4 text-center flex-grow">
-                Transfer Tokens
-              </h3>
-              <button
-                className="text-gray-600 hover:text-gray-800 pb-3"
-                onClick={handleCloseTransfer}
-              >
-                <i
-                  className="icon-close"
-                  style={{ fontWeight: "bold", fontStyle: "normal" }}
-                >
-                  X
-                </i>
-              </button>
-            </div>
-            <hr className="border-gray-500 mb-4" />
-            <form onSubmit={handleTransfer}>
-              <div className="mb-4">
-                <label className="block text-l font-medium">
-                  Recipient Address
-                </label>
-                <input
-                  type="text"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  className="border border-gray-400 rounded-md p-2 bg-transparent w-full font-bold"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-l font-medium">Amount</label>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="border border-gray-400 rounded-md p-2 bg-transparent w-full font-bold"
-                  required
-                />
-              </div>
-              <div className="mb-2">
-                <label className="block text-l font-medium">Token Symbol</label>
-                <input
-                  type="text"
-                  value={token}
-                  onChange={handleTokenChange}
-                  className="border border-gray-400 rounded-md p-2 bg-transparent w-full font-bold"
-                  required
-                />
-              </div>
-              {token && (
-                <p className="text-sm text-gray-600 mb-4">
-                  {detectedTokenType}
-                </p>
-              )}
-              {estimatedFee && (
-                <p className="text-sm text-gray-600 mb-4">
-                  Estimated Fee: {estimatedFee}
-                </p>
-              )}
-              <div className="flex justify-between">
-                <button type="submit" className="inject-button">
-                  Submit Transfer
-                </button>
-                <button
-                  type="button"
-                  className="inject-cancel-button"
-                  onClick={() => setIsTransferVisible(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {isConnectedWalletsVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
           <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
@@ -608,6 +542,91 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {isTransferVisible && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
+          <div className="bg-white rounded-lg p-4 shadow-lg max-w-md w-full">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-bold mb-4 text-center flex-grow">
+                Transfer Tokens
+              </h3>
+              <button
+                className="text-gray-600 hover:text-gray-800 pb-3"
+                onClick={handleCloseTransfer}
+              >
+                <i
+                  className="icon-close"
+                  style={{ fontWeight: "bold", fontStyle: "normal" }}
+                >
+                  X
+                </i>
+              </button>
+            </div>
+            <hr className="border-gray-500 mb-4" />
+            <form onSubmit={handleTransfer}>
+              <div className="mb-4">
+                <label className="block text-l font-medium">
+                  Recipient Address
+                </label>
+                <input
+                  type="text"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  className="border border-gray-400 rounded-md p-2 bg-transparent w-full font-bold"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-l font-medium">Amount</label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="border border-gray-400 rounded-md p-2 bg-transparent w-full font-bold"
+                  required
+                />
+              </div>
+              <div className="mb-2">
+                <label className="block text-l font-medium">Token Symbol</label>
+                <select
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  className="border border-black rounded-md p-2 bg-transparent w-full font-bold"
+                  required
+                >
+                  <option value="" disabled>
+                    Select a token
+                  </option>
+                  {tokenList.map((t) => (
+                    <option key={t.symbol} value={t.symbol}>
+                      {t.symbol} ({t.description})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* {token && (
+                <p className="text-sm text-gray-600 mb-4">
+                  {detectedTokenType}
+                </p>
+              )} */}
+              {estimatedFee && (
+                <p className="text-sm text-gray-600 mb-4">
+                  Estimated Fee: {estimatedFee}
+                </p>
+              )}
+              <div className="flex justify-between">
+                <button
+                  type="submit"
+                  className="inject-button"
+                  disabled={!estimatedFee}
+                >
+                  Transfer
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

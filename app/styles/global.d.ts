@@ -29,12 +29,12 @@ interface Xterium {
     value: string;
     fee: string;
   }): Promise<string>;
-  transferInternal: (
-    token: { symbol: string },
-    recipient: string,
-    value: string,
-    password: string
-  ) => Promise<TransferResponse>;
+  // transferInternal: (
+  //   token: { symbol: string },
+  //   recipient: string,
+  //   value: string,
+  //   password: string
+  // ) => Promise<TransferResponse>;
   transfer: (
     token: { symbol: string },
     recipient: string,
