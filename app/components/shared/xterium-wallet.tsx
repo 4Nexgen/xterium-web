@@ -53,6 +53,12 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
   }, []);
 
+  const fixBalanceReverse = (value: string, decimal: number = 12): string => {
+    const floatValue = parseFloat(value);
+    const integralValue = Math.round(floatValue * Math.pow(10, decimal));
+    return BigInt(integralValue).toString();
+  };
+
   const handleButtonClick = () => {
     if (isConnected) {
       setShowAlreadyConnectedPopup(true);
@@ -297,9 +303,10 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
               tokenObj = foundToken;
             }
           }
+          const convertedAmount = fixBalanceReverse(amount, 12);
           const fee = await window.xterium.getEstimateFee(
             window.xterium.connectedWallet!.public_key,
-            Number(amount),
+            Number(convertedAmount),
             recipient,
             { token: tokenObj }
           );
