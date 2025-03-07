@@ -31,6 +31,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const [isConnectWalletVisible, setIsConnectWalletVisible] = useState(false);
   const [isConnectedWalletsVisible, setIsConnectedWalletsVisible] =
     useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [token, setToken] = useState("");
@@ -96,25 +97,25 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const disconnectWallet = () => {
     if (!window.xterium?.isConnected) {
       Swal.fire({
-        title: 'No Wallet Connected',
+        title: "No Wallet Connected",
         text: "There's no wallet connected.",
-        icon: 'warning', 
-        timer: 1000, 
-        showConfirmButton: false
+        icon: "warning",
+        timer: 1000,
+        showConfirmButton: false,
       });
     } else {
       setConnectedWallet(null);
       window.xterium.isConnected = false;
       window.xterium.connectedWallet = null;
       window.xterium.saveConnectionState();
-        Swal.fire({
-        title: 'Disconnected',
-        text: 'Wallet disconnected successfully.',
-        icon: 'success', 
-        timer: 1000, 
-        timerProgressBar: true, 
-        showCloseButton: false, 
-        showConfirmButton: false 
+      Swal.fire({
+        title: "Disconnected",
+        text: "Wallet disconnected successfully.",
+        icon: "success",
+        timer: 1000,
+        timerProgressBar: true,
+        showCloseButton: false,
+        showConfirmButton: false,
       }).then(() => {
         window.location.reload();
       });
@@ -132,9 +133,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             if (typeof wallets === "string") {
               wallets = JSON.parse(wallets);
             }
-            if (typeof wallets === "string") {
-              wallets = JSON.parse(wallets);
-            }
             if (!Array.isArray(wallets)) {
               throw new Error("Parsed wallets is not an array");
             }
@@ -142,64 +140,32 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             setIsWalletLoading(false);
 
             if (wallets.length === 0) {
-              window.xterium.showExtension();
+              window.postMessage({ type: "XTERIUM_SHOW_EXTENSION" }, "*");
               return;
             }
 
             const validWallets = wallets.filter((wallet) => wallet.public_key);
 
             if (validWallets.length > 0) {
-              if (
-                window.xterium.isConnected &&
-                window.xterium.connectedWallet
-              ) {
-                console.log(
-                  "[Xterium] Already connected to:",
-                  window.xterium.connectedWallet.public_key
-                );
-                const connectedWallet = window.xterium.connectedWallet;
-                setWalletAccounts([
-                  {
-                    public_key: connectedWallet.public_key,
-                    name:
-                      connectedWallet.name ??
-                      connectedWallet.public_key.substring(0, 6),
-                  },
-                ]);
-                setConnectedWallet({
-                  public_key: connectedWallet.public_key,
-                  name:
-                    connectedWallet.name ??
-                    connectedWallet.public_key.substring(0, 6),
-                });
-                return;
-              }
-
-              setIsWalletSelecting(true);
-              window.xterium
-                .showSelectWalletToConnect(validWallets)
-                .then((wallet: WalletData) => {
-                  setIsWalletSelecting(false);
-                  setWalletAccounts([
-                    {
-                      public_key: wallet.public_key,
-                      name: wallet.name ?? wallet.public_key.substring(0, 6),
-                    },
-                  ]);
-                  setIsConnectedWalletsVisible(true);
-                  setIsConnectWalletVisible(false);
-                })
-                .catch((err: Error) => {
-                  setIsWalletSelecting(false);
-                  console.error("Error selecting wallet:", err);
-                });
+              setWalletAccounts(
+                validWallets.map((wallet) => ({
+                  public_key: wallet.public_key,
+                  name: wallet.name ?? wallet.public_key.substring(0, 6),
+                }))
+              );
+              // Do not set isConnectedWalletsVisible here
+              setIsConnectWalletVisible(false);
             } else {
               console.warn("No valid wallets found.");
-              window.xterium.showExtension();
+              window.postMessage({ type: "XTERIUM_SHOW_EXTENSION" }, "*");
             }
           } catch (error) {
             console.error("Error parsing wallets data:", error);
           }
+          break;
+        case "XTERIUM_WALLET_SELECTED":
+          setSelectedWallet(event.data.wallet);
+          setIsConnectedWalletsVisible(true); // Set to true after wallet is selected
           break;
         default:
           break;
@@ -215,88 +181,42 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     };
   }, [handleExtensionMessage]);
 
-  const handleShowConnectApprovalUI = () => {
-    if (!walletAccounts || walletAccounts.length === 0) {
-      console.error("No wallet accounts found.");
-      alert("No wallet accounts available. Please connect a wallet first.");
+  const handleShowConnectApprovalUI = (wallet: Wallet) => {
+    if (!wallet) {
+      console.error("No wallet selected.");
+      alert("No wallet selected. Please try again.");
       return;
     }
-
-    if (!walletAccounts[0]) {
-      console.error("Selected wallet is undefined.");
-      alert("Selected wallet is unavailable. Please reconnect.");
-      return;
-    }
-
-    if (!walletAccounts[0].public_key) {
-      console.error("Connected wallet does not have a public_key.");
+  
+    if (!wallet.public_key) {
+      console.error("Selected wallet does not have a public_key.");
       alert("Your wallet does not have a valid public key. Please try again.");
       return;
     }
-    if (window.xterium?.showConnectWalletSignAndVerify) {
-      setIsApprovalLoading(true);
-      window.xterium
-        .showConnectWalletSignAndVerify(walletAccounts[0])
-        .then(() => {
-          if (!walletAccounts[0]?.public_key) {
-            console.error(
-              "Connected wallet does not have a public_key after approval."
-            );
-            return;
-          }
-          window.xterium.isConnected = true;
-          window.xterium.saveConnectionState();
-          setIsApprovalLoading(false);
-          window.xterium.showSuccessConnectWalletMessage?.(walletAccounts[0]);
-          setConnectedWallet({
-            public_key: walletAccounts[0].public_key,
-            name:
-              walletAccounts[0].name ??
-              walletAccounts[0].public_key.substring(0, 6),
-          });
-          setIsConnectedWalletsVisible(false);
-          window.location.reload();
-        })
-        .catch((error: Error) => {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          if (errorMessage.includes("cancelled")) {
-            console.warn("User cancelled wallet connection.");
-            setIsConnectedWalletsVisible(false);
-          }
-          setIsApprovalLoading(false);
-        });
-    } else {
-      console.warn("Xterium approval UI is not available.");
-    }
+  
+    window.postMessage(
+      { type: "XTERIUM_CONNECT_WALLET_SIGN_AND_VERIFY", wallet },
+      "*"
+    );
+  
+    // Listen for the verification success message
+    const handleVerificationSuccess = (event: MessageEvent) => {
+      if (event.source !== window || !event.data) return;
+  
+      if (event.data.type === "XTERIUM_CONNECT_WALLET_VERIFIED") {
+        // Close the connected wallets UI
+        setIsConnectedWalletsVisible(false);
+  
+        // Reload the website
+        window.location.reload();
+  
+        // Remove the event listener
+        window.removeEventListener("message", handleVerificationSuccess);
+      }
+    };
+  
+    window.addEventListener("message", handleVerificationSuccess);
   };
-
-  // const handleTokenChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-  //   setToken(value);
-  //   if (window.xterium && window.xterium.getTokenList) {
-  //     try {
-  //       const tokenList = await window.xterium.getTokenList();
-  //       // console.log("Fetched token list:", tokenList);
-  //       const foundToken = Array.isArray(tokenList)
-  //         ? tokenList.find(
-  //             (t: XteriumToken) =>
-  //               t.symbol.toUpperCase() === value.trim().toUpperCase()
-  //           )
-  //         : null;
-  //       if (foundToken) {
-  //         setDetectedTokenType(`Detected as: ${foundToken.type}`);
-  //       } else {
-  //         setDetectedTokenType("Default: Native");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching token list:", error);
-  //       setDetectedTokenType("Error fetching token list, defaulting to Native");
-  //     }
-  //   } else {
-  //     setDetectedTokenType("Token list not available, defaulting to Native");
-  //   }
-  // };
 
   useEffect(() => {
     if (recipient && amount && token && window.xterium) {
@@ -388,9 +308,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           .then((response: TransferResponse) => {
             console.log("Transfer successful:", response);
 
-            window.xterium.showTransferSuccess(
-              transferringOverlay
-            );
+            window.xterium.showTransferSuccess(transferringOverlay);
             setTimeout(() => {
               setIsTransferVisible(false);
               document.body.removeChild(transferringOverlay);
@@ -526,7 +444,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         )}
       </div>
 
-      {isConnectedWalletsVisible && (
+      {isConnectedWalletsVisible && selectedWallet && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
           <div className="bg-white rounded-lg p-0 shadow-lg max-w-md w-full">
             <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-lg">
@@ -551,25 +469,23 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
               </h3>
             </div>
             <div className="pt-5 pb-16 pl-5 pr-5 mb-16">
-              {walletAccounts.length > 0 && (
-                <div
-                  className="container border-2 border-gray-300 p-6 rounded-lg cursor-pointer hover:bg-gray-100 transition duration-200"
-                  onClick={handleShowConnectApprovalUI}
-                >
-                  {isApprovalLoading ? (
-                    <Spinner />
-                  ) : (
-                    <p className="text-lg font-bold text-center">
-                      {walletAccounts[0].name}
-                      <span className="ml-2">
-                        {walletAccounts[0].public_key.substring(0, 6) +
-                          "..." +
-                          walletAccounts[0].public_key.slice(-6)}
-                      </span>
-                    </p>
-                  )}
-                </div>
-              )}
+              <div
+                className="container border-2 border-gray-300 p-6 rounded-lg cursor-pointer hover:bg-gray-100 transition duration-200"
+                onClick={() => handleShowConnectApprovalUI(selectedWallet)} // Use the selected wallet
+              >
+                {isApprovalLoading ? (
+                  <Spinner />
+                ) : (
+                  <p className="text-lg font-bold text-center">
+                    {selectedWallet.name}
+                    <span className="ml-2">
+                      {selectedWallet.public_key.substring(0, 6) +
+                        "..." +
+                        selectedWallet.public_key.slice(-6)}
+                    </span>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
