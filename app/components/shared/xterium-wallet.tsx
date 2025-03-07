@@ -9,10 +9,10 @@ type Wallet = {
   name?: string;
 };
 
-interface XteriumToken {
-  symbol: string;
-  type: string;
-}
+// interface XteriumToken {
+//   symbol: string;
+//   type: string;
+// }
 
 type WalletData = {
   public_key: string;
@@ -50,12 +50,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       setIsConnected(window.xterium?.isConnected || false);
     }
   }, []);
-
-  const fixBalanceReverse = (value: string, decimal: number = 12): string => {
-    const floatValue = parseFloat(value);
-    const integralValue = Math.round(floatValue * Math.pow(10, decimal));
-    return BigInt(integralValue).toString();
-  };
 
   const handleConnectButtonClick = () => {
     if (isConnected) {
@@ -167,6 +161,49 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           setSelectedWallet(event.data.wallet);
           setIsConnectedWalletsVisible(true); // Set to true after wallet is selected
           break;
+        case "XTERIUM_TOKEN_LIST_RESPONSE":
+          if (Array.isArray(event.data.tokenList)) {
+            setTokenList(event.data.tokenList);
+          } else {
+            console.error("Invalid token list received:", event.data.tokenList);
+            setTokenList([]); // Fallback to an empty array
+          }
+          break;
+        case "XTERIUM_ESTIMATE_FEE_RESPONSE":
+          if (
+            event.data.substrateFee &&
+            typeof event.data.substrateFee === "object"
+          ) {
+            const partialFee = event.data.substrateFee.partialFee;
+            setEstimatedFee(partialFee.toString()); // Convert to string for rendering
+          } else {
+            console.error("Invalid fee response:", event.data.substrateFee);
+            setEstimatedFee("Error");
+          }
+          break;
+        case "XTERIUM_TRANSFER_SUCCESS":
+          Swal.fire({
+            title: "Transfer Successful",
+            text: "Your transfer was completed successfully.",
+            icon: "success",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          }).then(() => {
+            setIsTransferVisible(false);
+            window.location.reload();
+          });
+          break;
+        case "XTERIUM_TRANSFER_FAILED":
+          Swal.fire({
+            title: "Transfer Failed",
+            text: event.data.error || "An error occurred during the transfer.",
+            icon: "error",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          break;
         default:
           break;
       }
@@ -187,34 +224,34 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       alert("No wallet selected. Please try again.");
       return;
     }
-  
+
     if (!wallet.public_key) {
       console.error("Selected wallet does not have a public_key.");
       alert("Your wallet does not have a valid public key. Please try again.");
       return;
     }
-  
+
     window.postMessage(
       { type: "XTERIUM_CONNECT_WALLET_SIGN_AND_VERIFY", wallet },
       "*"
     );
-  
+
     // Listen for the verification success message
     const handleVerificationSuccess = (event: MessageEvent) => {
       if (event.source !== window || !event.data) return;
-  
+
       if (event.data.type === "XTERIUM_CONNECT_WALLET_VERIFIED") {
         // Close the connected wallets UI
         setIsConnectedWalletsVisible(false);
-  
+
         // Reload the website
         window.location.reload();
-  
+
         // Remove the event listener
         window.removeEventListener("message", handleVerificationSuccess);
       }
     };
-  
+
     window.addEventListener("message", handleVerificationSuccess);
   };
 
@@ -224,49 +261,42 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         console.error("No connected wallet available for fee estimation.");
         return;
       }
-      const estimateFee = async () => {
-        try {
-          const tokenList = await window.xterium.getTokenList();
-          let tokenObj: { symbol: string; type: string } = {
-            symbol: token,
-            type: "Native",
-          };
-          if (Array.isArray(tokenList)) {
-            const foundToken = tokenList.find(
-              (t: XteriumToken) =>
-                t.symbol.toUpperCase() === token.trim().toUpperCase()
-            );
-            if (foundToken) {
-              tokenObj = foundToken;
-            }
-          }
-          const convertedAmount = fixBalanceReverse(amount, 12);
-          const fee = await window.xterium.getEstimateFee(
-            window.xterium.connectedWallet!.public_key,
-            Number(convertedAmount),
-            recipient,
-            { token: tokenObj }
-          );
-          const fixedFee = window.xterium.fixBalance(fee.partialFee, 12);
-          setEstimatedFee(fixedFee.toString());
-        } catch (error) {
-          console.error("Fee estimation error:", error);
-          setEstimatedFee("Error");
-        }
-      };
-      estimateFee();
+
+      const owner = window.xterium.connectedWallet.public_key;
+
+      // Fetch the token details
+      const tokenDetails = tokenList.find((t) => t.symbol === token);
+      if (!tokenDetails) {
+        console.error("Token not found in token list.");
+        return;
+      }
+
+      // Estimate the fee with a buffer
+      window.postMessage(
+        {
+          type: "XTERIUM_GET_ESTIMATE_FEE",
+          owner,
+          value: Number(amount),
+          recipient,
+          balance: { token: tokenDetails },
+        },
+        "*"
+      );
     } else {
       setEstimatedFee("");
     }
-  }, [recipient, amount, token]);
+  }, [recipient, amount, token, tokenList]);
+
+  // const fixBalanceReverse = (value: string, decimal: number = 12): string => {
+  //   const floatValue = parseFloat(value);
+  //   const integralValue = Math.round(floatValue * Math.pow(10, decimal));
+  //   return BigInt(integralValue).toString();
+  // };
 
   const handleTransferModalOpen = async () => {
     if (window.xterium.isConnected == true) {
       try {
-        if (window.xterium.getTokenList) {
-          const tokens = await window.xterium.getTokenList();
-          setTokenList(tokens);
-        }
+        window.postMessage({ type: "XTERIUM_GET_TOKEN_LIST" }, "*");
         setIsTransferVisible(true);
       } catch (error) {
         console.error("Error fetching token list:", error);
@@ -289,45 +319,34 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if all required fields are filled
     if (!recipient || !amount || !token) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    (window.xterium as Xterium)
-      .showTransferSignAndVerify({
-        token: { symbol: token },
-        recipient,
-        value: amount,
-        fee: estimatedFee || "Calculating...",
-      })
-      .then((approvedPassword: string) => {
-        const transferringOverlay = window.xterium.showTransferProcessing();
-        (window.xterium as Xterium)
-          .transfer({ symbol: token }, recipient, amount, approvedPassword)
-          .then((response: TransferResponse) => {
-            console.log("Transfer successful:", response);
+    // Check if window.xterium and connectedWallet exist
+    if (!window.xterium?.connectedWallet) {
+      console.error("No connected wallet available for transfer.");
+      alert("No wallet connected. Please connect your wallet first.");
+      return;
+    }
 
-            window.xterium.showTransferSuccess(transferringOverlay);
-            setTimeout(() => {
-              setIsTransferVisible(false);
-              document.body.removeChild(transferringOverlay);
+    const owner = window.xterium.connectedWallet.public_key;
 
-              setRecipient("");
-              setAmount("");
-              setToken("");
-
-              window.location.reload();
-            }, 1000);
-          })
-          .catch((error: Error) => {
-            console.error("Transfer failed:", error);
-            alert("Transfer failed. Please try again.");
-          });
-      })
-      .catch((error: Error) => {
-        console.error("Approval UI rejected:", error);
-      });
+    window.postMessage(
+      {
+        type: "XTERIUM_TRANSFER_REQUEST",
+        payload: {
+          token: { symbol: token },
+          owner,
+          recipient,
+          value: Number(amount),
+        },
+      },
+      "*"
+    );
   };
 
   const Spinner = () => (
@@ -545,18 +564,14 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                   <option value="" disabled>
                     Select a token
                   </option>
-                  {tokenList.map((t) => (
-                    <option key={t.symbol} value={t.symbol}>
-                      {t.symbol} ({t.description})
-                    </option>
-                  ))}
+                  {Array.isArray(tokenList) &&
+                    tokenList.map((t) => (
+                      <option key={t.symbol} value={t.symbol}>
+                        {t.symbol} ({t.description})
+                      </option>
+                    ))}
                 </select>
               </div>
-              {/* {token && (
-                <p className="text-sm text-gray-600 mb-4">
-                  {detectedTokenType}
-                </p>
-              )} */}
               {estimatedFee && (
                 <p className="text-sm text-gray-600 mb-4">
                   Estimated Fee: {estimatedFee}
