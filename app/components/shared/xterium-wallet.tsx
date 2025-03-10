@@ -9,10 +9,11 @@ type Wallet = {
   name?: string;
 };
 
-// interface XteriumToken {
-//   symbol: string;
-//   type: string;
-// }
+type Token = {
+  type: string;
+  symbol: string;
+  description: string;
+};
 
 type WalletData = {
   public_key: string;
@@ -35,14 +36,11 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [token, setToken] = useState("");
-  const [detectedTokenType, setDetectedTokenType] = useState("");
-  const [estimatedFee, setEstimatedFee] = useState<string>("");
   const [isWalletLoading, setIsWalletLoading] = useState(false);
   const [isWalletSelecting, setIsWalletSelecting] = useState(false);
   const [isApprovalLoading, setIsApprovalLoading] = useState(false);
-  const [tokenList, setTokenList] = useState<
-    { symbol: string; description: string }[]
-  >([]);
+  const [tokenList, setTokenList] = useState<Token[]>([]);
+  const [partialFee, setPartialFee] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -78,8 +76,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     setRecipient("");
     setAmount("");
     setToken("");
-    setDetectedTokenType("");
-    setEstimatedFee("");
   };
 
   const connectXteriumWallet = () => {
@@ -147,7 +143,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                   name: wallet.name ?? wallet.public_key.substring(0, 6),
                 }))
               );
-              // Do not set isConnectedWalletsVisible here
               setIsConnectWalletVisible(false);
             } else {
               console.warn("No valid wallets found.");
@@ -159,26 +154,25 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           break;
         case "XTERIUM_WALLET_SELECTED":
           setSelectedWallet(event.data.wallet);
-          setIsConnectedWalletsVisible(true); // Set to true after wallet is selected
+          setIsConnectedWalletsVisible(true);
           break;
         case "XTERIUM_TOKEN_LIST_RESPONSE":
           if (Array.isArray(event.data.tokenList)) {
             setTokenList(event.data.tokenList);
           } else {
             console.error("Invalid token list received:", event.data.tokenList);
-            setTokenList([]); // Fallback to an empty array
           }
           break;
+
         case "XTERIUM_ESTIMATE_FEE_RESPONSE":
-          if (
-            event.data.substrateFee &&
-            typeof event.data.substrateFee === "object"
-          ) {
-            const partialFee = event.data.substrateFee.partialFee;
-            setEstimatedFee(partialFee.toString()); // Convert to string for rendering
+          if (event.data.error) {
+            console.error("Fee estimation error:", event.data.error);
+          } else if (event.data.substrateFee) {
+            const fee = event.data.substrateFee.partialFee;
+            console.log("Estimated fee received:", fee);
+            setPartialFee(fee);
           } else {
-            console.error("Invalid fee response:", event.data.substrateFee);
-            setEstimatedFee("Error");
+            console.error("Invalid fee response:", event.data);
           }
           break;
         case "XTERIUM_TRANSFER_SUCCESS":
@@ -236,23 +230,58 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       "*"
     );
 
-    // Listen for the verification success message
     const handleVerificationSuccess = (event: MessageEvent) => {
       if (event.source !== window || !event.data) return;
 
       if (event.data.type === "XTERIUM_CONNECT_WALLET_VERIFIED") {
-        // Close the connected wallets UI
         setIsConnectedWalletsVisible(false);
 
-        // Reload the website
         window.location.reload();
 
-        // Remove the event listener
         window.removeEventListener("message", handleVerificationSuccess);
       }
     };
 
     window.addEventListener("message", handleVerificationSuccess);
+  };
+
+  const handleEstimateFee = () => {
+    const tokenDetails = tokenList.find(
+      (t) => t.symbol === token.trim().toUpperCase()
+    );
+
+    if (!tokenDetails) {
+      console.error(`Token "${token}" not found in token list.`);
+      alert(
+        `Token "${token}" not found. Please check the symbol and try again.`
+      );
+      return;
+    }
+
+    const connectedWallet = window.xterium?.connectedWallet;
+    if (!connectedWallet) {
+      console.error("No connected wallet available for fee estimation.");
+      alert("No wallet connected. Please connect your wallet first.");
+      return;
+    }
+
+    const owner = connectedWallet.public_key;
+
+    const tokenObj = {
+      symbol: tokenDetails.symbol,
+      type: tokenDetails.type || "Native",
+    };
+
+    window.postMessage(
+      {
+        type: "XTERIUM_GET_ESTIMATE_FEE",
+        owner,
+        value: Number(amount),
+        recipient,
+        balance: { token: tokenObj },
+      },
+      "*"
+    );
   };
 
   useEffect(() => {
@@ -262,28 +291,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         return;
       }
 
-      const owner = window.xterium.connectedWallet.public_key;
-
-      // Fetch the token details
-      const tokenDetails = tokenList.find((t) => t.symbol === token);
-      if (!tokenDetails) {
-        console.error("Token not found in token list.");
-        return;
-      }
-
-      // Estimate the fee with a buffer
-      window.postMessage(
-        {
-          type: "XTERIUM_GET_ESTIMATE_FEE",
-          owner,
-          value: Number(amount),
-          recipient,
-          balance: { token: tokenDetails },
-        },
-        "*"
-      );
-    } else {
-      setEstimatedFee("");
+      handleEstimateFee();
     }
   }, [recipient, amount, token, tokenList]);
 
@@ -292,6 +300,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   //   const integralValue = Math.round(floatValue * Math.pow(10, decimal));
   //   return BigInt(integralValue).toString();
   // };
+
+  useEffect(() => {
+    if (window.xterium?.isConnected && tokenList.length === 0) {
+      console.log("Fetching token list on wallet connect...");
+      window.postMessage({ type: "XTERIUM_GET_TOKEN_LIST" }, "*");
+    }
+  }, [isConnected]);
 
   const handleTransferModalOpen = async () => {
     if (window.xterium.isConnected == true) {
@@ -319,14 +334,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted");
 
-    // Check if all required fields are filled
     if (!recipient || !amount || !token) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    // Check if window.xterium and connectedWallet exist
     if (!window.xterium?.connectedWallet) {
       console.error("No connected wallet available for transfer.");
       alert("No wallet connected. Please connect your wallet first.");
@@ -335,6 +349,12 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
     const owner = window.xterium.connectedWallet.public_key;
 
+    console.log("Transfer Details:", {
+      token: { symbol: token },
+      owner,
+      recipient,
+      value: Number(amount),
+    });
     window.postMessage(
       {
         type: "XTERIUM_TRANSFER_REQUEST",
@@ -490,7 +510,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             <div className="pt-5 pb-16 pl-5 pr-5 mb-16">
               <div
                 className="container border-2 border-gray-300 p-6 rounded-lg cursor-pointer hover:bg-gray-100 transition duration-200"
-                onClick={() => handleShowConnectApprovalUI(selectedWallet)} // Use the selected wallet
+                onClick={() => handleShowConnectApprovalUI(selectedWallet)}
               >
                 {isApprovalLoading ? (
                   <Spinner />
@@ -563,25 +583,26 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                 >
                   <option value="" disabled>
                     Select a token
-                  </option>
-                  {Array.isArray(tokenList) &&
+                  </option>{" "}
+                  {tokenList.length === 0 ? (
+                    <option disabled>🔄 Loading tokens...</option> // ✅ Show while fetching
+                  ) : (
                     tokenList.map((t) => (
                       <option key={t.symbol} value={t.symbol}>
                         {t.symbol} ({t.description})
                       </option>
-                    ))}
+                    ))
+                  )}
                 </select>
               </div>
-              {estimatedFee && (
-                <p className="text-sm text-gray-600 mb-4">
-                  Estimated Fee: {estimatedFee}
-                </p>
+              {partialFee && (
+                <p className="text-sm text-gray-600 mb-4">Fee: {partialFee}</p>
               )}
               <div className="flex justify-between">
                 <button
                   type="submit"
                   className="inject-button"
-                  disabled={!estimatedFee}
+                  disabled={!partialFee}
                 >
                   Transfer
                 </button>
