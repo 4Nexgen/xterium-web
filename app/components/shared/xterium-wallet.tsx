@@ -94,10 +94,11 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         showConfirmButton: false,
       });
     } else {
-      setConnectedWallet(null);
-      window.xterium.isConnected = false;
-      window.xterium.connectedWallet = null;
-      window.xterium.saveConnectionState();
+      // Send a message to injected.js to handle disconnection
+      window.postMessage({ type: "XTERIUM_DISCONNECT_REQUEST" }, "*");
+
+      setConnectedWallet(null); // Reset local state
+
       Swal.fire({
         title: "Disconnected",
         text: "Wallet disconnected successfully.",
@@ -111,6 +112,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       });
     }
   };
+
 
   const handleExtensionMessage = useCallback(
     (event: MessageEvent) => {
@@ -329,7 +331,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
-        willClose: () => {},
+        willClose: () => { },
       });
     }
   };
@@ -350,12 +352,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
 
     const owner = window.xterium.connectedWallet.public_key;
+    const formattedAmount = fixBalanceReverse(amount);
 
     console.log("Transfer Details:", {
       token: { symbol: token },
       owner,
       recipient,
-      value: Number(amount),
+      value: formattedAmount,
     });
     window.postMessage(
       {
@@ -364,7 +367,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           token: { symbol: token },
           owner,
           recipient,
-          value: Number(amount),
+          value: formattedAmount,
         },
       },
       "*"
