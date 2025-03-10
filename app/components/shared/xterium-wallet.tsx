@@ -245,6 +245,12 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     window.addEventListener("message", handleVerificationSuccess);
   };
 
+  const fixBalanceReverse = (value: string, decimal: number = 12): string => {
+    const floatValue = parseFloat(value);
+    const integralValue = Math.round(floatValue * Math.pow(10, decimal));
+    return BigInt(integralValue).toString();
+  };
+
   const handleEstimateFee = () => {
     const tokenDetails = tokenList.find(
       (t) => t.symbol === token.trim().toUpperCase()
@@ -272,11 +278,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       type: tokenDetails.type || "Native",
     };
 
+    const formattedAmount = fixBalanceReverse(amount);
+
     window.postMessage(
       {
         type: "XTERIUM_GET_ESTIMATE_FEE",
         owner,
-        value: Number(amount),
+        value: Number(formattedAmount),
         recipient,
         balance: { token: tokenObj },
       },
@@ -294,12 +302,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       handleEstimateFee();
     }
   }, [recipient, amount, token, tokenList]);
-
-  // const fixBalanceReverse = (value: string, decimal: number = 12): string => {
-  //   const floatValue = parseFloat(value);
-  //   const integralValue = Math.round(floatValue * Math.pow(10, decimal));
-  //   return BigInt(integralValue).toString();
-  // };
 
   useEffect(() => {
     if (window.xterium?.isConnected && tokenList.length === 0) {
