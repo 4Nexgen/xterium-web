@@ -113,7 +113,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
   };
 
-
   const handleExtensionMessage = useCallback(
     (event: MessageEvent) => {
       if (event.source !== window) return;
@@ -248,9 +247,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   };
 
   const fixBalanceReverse = (value: string, decimal: number = 12): string => {
-    const floatValue = parseFloat(value);
-    const integralValue = Math.round(floatValue * Math.pow(10, decimal));
-    return BigInt(integralValue).toString();
+    return (BigInt(value) * BigInt(10 ** decimal)).toString();
   };
 
   const handleEstimateFee = () => {
@@ -301,7 +298,11 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         return;
       }
 
-      handleEstimateFee();
+      if (!partialFee) {
+        // ✅ Prevents duplicate estimations
+        console.log("🔄 Estimating fee...");
+        handleEstimateFee();
+      }
     }
   }, [recipient, amount, token, tokenList]);
 
@@ -331,7 +332,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
-        willClose: () => { },
+        willClose: () => {},
       });
     }
   };
@@ -352,23 +353,23 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
 
     const owner = window.xterium.connectedWallet.public_key;
-    const formattedAmount = fixBalanceReverse(amount);
+    const formattedAmount = fixBalanceReverse(amount, 12);
 
-    console.log("Transfer Details:", {
+    const transferDetails = {
       token: { symbol: token },
       owner,
       recipient,
       value: formattedAmount,
-    });
+      fee: partialFee, // ✅ Include the estimated fee
+    };
+
+    console.log("📩 Transfer Details Before Sending:", transferDetails);
+
+    // ✅ Send transaction request with fee included
     window.postMessage(
       {
         type: "XTERIUM_TRANSFER_REQUEST",
-        payload: {
-          token: { symbol: token },
-          owner,
-          recipient,
-          value: formattedAmount,
-        },
+        payload: transferDetails,
       },
       "*"
     );
@@ -600,13 +601,12 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                   )}
                 </select>
               </div>
-              {partialFee && (
-                <p className="text-sm text-gray-600 mb-4">Fee: {partialFee}</p>
-              )}
               <div className="flex justify-between">
                 <button
                   type="submit"
-                  className="inject-button"
+                  className={`inject-button ${
+                    !partialFee ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   disabled={!partialFee}
                 >
                   Transfer
