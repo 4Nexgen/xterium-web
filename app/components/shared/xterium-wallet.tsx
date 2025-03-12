@@ -158,10 +158,18 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           setIsConnectedWalletsVisible(true);
           break;
         case "XTERIUM_TOKEN_LIST_RESPONSE":
-          if (Array.isArray(event.data.tokenList)) {
-            setTokenList(event.data.tokenList);
-          } else {
-            console.error("Invalid token list received:", event.data.tokenList);
+          try {
+            let tokenList = event.data.tokenList;
+            if (typeof tokenList === "string") {
+              tokenList = JSON.parse(tokenList); 
+            }
+            if (Array.isArray(tokenList)) {
+              setTokenList(tokenList);
+            } else {
+              console.error("Invalid token list received:", tokenList);
+            }
+          } catch (error) {
+            console.error("Error parsing token list:", error);
           }
           break;
 
