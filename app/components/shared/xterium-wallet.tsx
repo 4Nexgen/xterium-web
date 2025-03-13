@@ -44,6 +44,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const [isTransferInProgress, setIsTransferInProgress] = useState(false);
   const [isFeeEstimated, setIsFeeEstimated] = useState(false);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -95,8 +96,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         showConfirmButton: false,
       });
     } else {
-
-      setConnectedWallet(null); 
+      setConnectedWallet(null);
 
       Swal.fire({
         title: "Disconnected",
@@ -112,6 +112,18 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     }
   };
 
+  const fetchWalletBalance = useCallback(() => {
+    const connectedWallet = window.xterium?.connectedWallet;
+    if (connectedWallet) {
+      window.postMessage(
+        {
+          type: "XTERIUM_GET_WALLET_BALANCE",
+          publicKey: connectedWallet.public_key,
+        },
+        "*"
+      );
+    }
+  }, []);
 
   const handleExtensionMessage = useCallback(
     (event: MessageEvent) => {
@@ -158,10 +170,18 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           setIsConnectedWalletsVisible(true);
           break;
         case "XTERIUM_TOKEN_LIST_RESPONSE":
-          if (Array.isArray(event.data.tokenList)) {
-            setTokenList(event.data.tokenList);
-          } else {
-            console.error("Invalid token list received:", event.data.tokenList);
+          try {
+            let tokenList = event.data.tokenList;
+            if (typeof tokenList === "string") {
+              tokenList = JSON.parse(tokenList);
+            }
+            if (Array.isArray(tokenList)) {
+              setTokenList(tokenList);
+            } else {
+              console.error("Invalid token list received:", tokenList);
+            }
+          } catch (error) {
+            console.error("Error parsing token list:", error);
           }
           break;
 
@@ -189,7 +209,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           }).then(() => {
             setIsTransferVisible(false);
             setIsTransferInProgress(false);
-            window.location.reload();
+            // window.location.reload();
           });
           break;
         case "XTERIUM_TRANSFER_FAILED":
@@ -201,7 +221,17 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             timerProgressBar: true,
             showConfirmButton: false,
           });
-          setIsTransferInProgress(false); 
+          setIsTransferInProgress(false);
+          break;
+        case "XTERIUM_BALANCE_RESPONSE":
+          if (event.data.error) {
+            console.error("Error fetching wallet balance:", event.data.error);
+          } else {
+            setWalletBalance(event.data.balance);
+          }
+          break;
+        case "XTERIUM_UPDATED_BALANCE":
+          setWalletBalance(event.data.balance);
           break;
         default:
           break;
@@ -220,7 +250,15 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const handleShowConnectApprovalUI = (wallet: Wallet) => {
     if (!wallet) {
       console.error("No wallet selected.");
-      alert("No wallet selected. Please try again.");
+      Swal.fire({
+        title: "Error",
+        text: "No wallet selected. Please try again.",
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
       return;
     }
 
@@ -240,7 +278,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
       if (event.data.type === "XTERIUM_CONNECT_WALLET_VERIFIED") {
         setIsConnectedWalletsVisible(false);
-
+        fetchWalletBalance();
         window.location.reload();
 
         window.removeEventListener("message", handleVerificationSuccess);
@@ -248,6 +286,14 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     };
 
     window.addEventListener("message", handleVerificationSuccess);
+
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "XTERIUM_CONNECT_WALLET_VERIFIED") {
+        setIsConnectedWalletsVisible(false);
+        fetchWalletBalance();
+        window.location.reload();
+      }
+    });
   };
 
   const fixBalanceReverse = (value: string, decimal: number = 12): string => {
@@ -263,16 +309,30 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
     if (!tokenDetails) {
       console.error(`Token "${token}" not found in token list.`);
-      alert(
-        `Token "${token}" not found. Please check the symbol and try again.`
-      );
+      Swal.fire({
+        title: "Error",
+        text: `Token "${token}" not found. Please check the symbol and try again.`,
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
       return;
     }
 
     const connectedWallet = window.xterium?.connectedWallet;
     if (!connectedWallet) {
       console.error("No connected wallet available for fee estimation.");
-      alert("No wallet connected. Please connect your wallet first.");
+      Swal.fire({
+        title: "Error",
+        text: "No wallet connected. Please connect your wallet first.",
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
       return;
     }
 
@@ -298,7 +358,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   }, [token, tokenList, amount, recipient]);
 
   useEffect(() => {
-    if (recipient && amount && token && window.xterium && !isTransferInProgress) {
+    if (
+      recipient &&
+      amount &&
+      token &&
+      window.xterium &&
+      !isTransferInProgress
+    ) {
       if (!window.xterium.connectedWallet) {
         console.error("No connected wallet available for fee estimation.");
         return;
@@ -306,7 +372,14 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
       handleEstimateFee();
     }
-  }, [recipient, amount, token, tokenList, isTransferInProgress, handleEstimateFee]);
+  }, [
+    recipient,
+    amount,
+    token,
+    tokenList,
+    isTransferInProgress,
+    handleEstimateFee,
+  ]);
 
   useEffect(() => {
     if (window.xterium?.isConnected && tokenList.length === 0) {
@@ -333,7 +406,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
-        willClose: () => { },
+        willClose: () => {},
       });
     }
   };
@@ -342,19 +415,75 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     e.preventDefault();
 
     if (!recipient || !amount || !token) {
-      alert("Please fill in all required fields.");
+      Swal.fire({
+        title: "Error",
+        text: "Please fill in all required fields.",
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
       return;
     }
 
     if (!window.xterium?.connectedWallet) {
       console.error("No connected wallet available for transfer.");
-      alert("No wallet connected. Please connect your wallet first.");
+      Swal.fire({
+        title: "Error",
+        text: "No wallet connected. Please connect your wallet first.",
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
       return;
     }
-    setIsTransferInProgress(true); 
 
     const owner = window.xterium.connectedWallet.public_key;
-    const formattedAmount = fixBalanceReverse(amount);
+    if (recipient === owner) {
+      Swal.fire({
+        title: "Error",
+        text: "Cannot transfer to the same wallet.",
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
+      return;
+    }
+
+    const formattedAmount = parseFloat(amount);
+    if (isNaN(formattedAmount)) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid amount entered.",
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
+      return;
+    }
+    if (walletBalance !== null && formattedAmount > walletBalance) {
+      Swal.fire({
+        title: "Error",
+        text: "Insufficient balance for this transfer.",
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        willClose: () => {},
+      });
+      return;
+    }
+
+    setIsTransferInProgress(true);
+
+    const formattedAmountForTransfer = fixBalanceReverse(amount);
 
     window.postMessage(
       {
@@ -363,7 +492,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           token: { symbol: token },
           owner,
           recipient,
-          value: formattedAmount,
+          value: formattedAmountForTransfer,
         },
       },
       "*"
@@ -586,7 +715,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                     Select a token
                   </option>{" "}
                   {tokenList.length === 0 ? (
-                    <option disabled>🔄 Loading tokens...</option> 
+                    <option disabled>🔄 Loading tokens...</option>
                   ) : (
                     tokenList.map((t) => (
                       <option key={t.symbol} value={t.symbol}>
@@ -599,8 +728,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
               <div className="flex justify-between">
                 <button
                   type="submit"
-                  className={`inject-button ${!partialFee ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                  className={`inject-button ${
+                    !partialFee ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   disabled={!partialFee}
                 >
                   Transfer
