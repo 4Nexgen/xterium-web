@@ -81,7 +81,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   };
 
   const connectXteriumWallet = () => {
-    console.log("Connecting to Xterium Wallet...");
     setIsWalletLoading(true);
     window.postMessage({ type: "XTERIUM_GET_WALLETS" }, "*");
   };
@@ -97,7 +96,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       });
     } else {
 
-      setConnectedWallet(null); // Reset local state
+      setConnectedWallet(null); 
 
       Swal.fire({
         title: "Disconnected",
@@ -170,14 +169,10 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           if (event.data.error) {
             console.error("Fee estimation error:", event.data.error);
           } else if (event.data.substrateFee) {
-            // Check if the fee has already been estimated
             if (!isFeeEstimated) {
               const fee = event.data.substrateFee.partialFee;
-              console.log("Estimated fee received:", fee);
               setPartialFee(fee);
-              setIsFeeEstimated(true); // Set the flag to true after estimating the fee
-            } else {
-              console.log("Fee has already been estimated, skipping re-estimation.");
+              setIsFeeEstimated(true);
             }
           } else {
             console.error("Invalid fee response:", event.data);
@@ -193,7 +188,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             showConfirmButton: false,
           }).then(() => {
             setIsTransferVisible(false);
-            setIsTransferInProgress(false); // Reset transfer state
+            setIsTransferInProgress(false);
             window.location.reload();
           });
           break;
@@ -206,13 +201,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             timerProgressBar: true,
             showConfirmButton: false,
           });
-          setIsTransferInProgress(false); // Reset transfer state
+          setIsTransferInProgress(false); 
           break;
         default:
           break;
       }
     },
-    [setConnectedWallet]
+    [isFeeEstimated]
   );
 
   useEffect(() => {
@@ -261,7 +256,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     return BigInt(integralValue).toString();
   };
 
-  const handleEstimateFee = () => {
+  const handleEstimateFee = useCallback(() => {
     const tokenDetails = tokenList.find(
       (t) => t.symbol === token.trim().toUpperCase()
     );
@@ -289,7 +284,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     };
 
     const formattedAmount = fixBalanceReverse(amount);
-    console.log(`[XteriumWallet] Converted value: ${amount} -> ${formattedAmount}`);
 
     window.postMessage(
       {
@@ -301,7 +295,8 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       },
       "*"
     );
-  };
+  }, [token, tokenList, amount, recipient]);
+
   useEffect(() => {
     if (recipient && amount && token && window.xterium && !isTransferInProgress) {
       if (!window.xterium.connectedWallet) {
@@ -311,14 +306,13 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
       handleEstimateFee();
     }
-  }, [recipient, amount, token, tokenList, isTransferInProgress]);
+  }, [recipient, amount, token, tokenList, isTransferInProgress, handleEstimateFee]);
 
   useEffect(() => {
     if (window.xterium?.isConnected && tokenList.length === 0) {
-      console.log("Fetching token list on wallet connect...");
       window.postMessage({ type: "XTERIUM_GET_TOKEN_LIST" }, "*");
     }
-  }, [isConnected]);
+  }, [isConnected, tokenList]);
 
   const handleTransferModalOpen = async () => {
     if (window.xterium.isConnected == true) {
@@ -346,7 +340,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted");
 
     if (!recipient || !amount || !token) {
       alert("Please fill in all required fields.");
@@ -358,11 +351,10 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       alert("No wallet connected. Please connect your wallet first.");
       return;
     }
-    setIsTransferInProgress(true); // Set transfer in progress
+    setIsTransferInProgress(true); 
 
     const owner = window.xterium.connectedWallet.public_key;
     const formattedAmount = fixBalanceReverse(amount);
-    console.log("Transfer Details:", { token, owner, recipient, value: formattedAmount });
 
     window.postMessage(
       {
@@ -594,7 +586,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                     Select a token
                   </option>{" "}
                   {tokenList.length === 0 ? (
-                    <option disabled>🔄 Loading tokens...</option> // ✅ Show while fetching
+                    <option disabled>🔄 Loading tokens...</option> 
                   ) : (
                     tokenList.map((t) => (
                       <option key={t.symbol} value={t.symbol}>
