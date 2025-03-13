@@ -42,6 +42,8 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   const [tokenList, setTokenList] = useState<Token[]>([]);
   const [partialFee, setPartialFee] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isTransferInProgress, setIsTransferInProgress] = useState(false);
+  const [isFeeEstimated, setIsFeeEstimated] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -94,8 +96,6 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         showConfirmButton: false,
       });
     } else {
-      // Send a message to injected.js to handle disconnection
-      window.postMessage({ type: "XTERIUM_DISCONNECT_REQUEST" }, "*");
 
       setConnectedWallet(null); // Reset local state
 
@@ -112,6 +112,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       });
     }
   };
+
 
   const handleExtensionMessage = useCallback(
     (event: MessageEvent) => {
@@ -158,18 +159,10 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           setIsConnectedWalletsVisible(true);
           break;
         case "XTERIUM_TOKEN_LIST_RESPONSE":
-          try {
-            let tokenList = event.data.tokenList;
-            if (typeof tokenList === "string") {
-              tokenList = JSON.parse(tokenList); 
-            }
-            if (Array.isArray(tokenList)) {
-              setTokenList(tokenList);
-            } else {
-              console.error("Invalid token list received:", tokenList);
-            }
-          } catch (error) {
-            console.error("Error parsing token list:", error);
+          if (Array.isArray(event.data.tokenList)) {
+            setTokenList(event.data.tokenList);
+          } else {
+            console.error("Invalid token list received:", event.data.tokenList);
           }
           break;
 
@@ -177,9 +170,15 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           if (event.data.error) {
             console.error("Fee estimation error:", event.data.error);
           } else if (event.data.substrateFee) {
-            const fee = event.data.substrateFee.partialFee;
-            console.log("Estimated fee received:", fee);
-            setPartialFee(fee);
+            // Check if the fee has already been estimated
+            if (!isFeeEstimated) {
+              const fee = event.data.substrateFee.partialFee;
+              console.log("Estimated fee received:", fee);
+              setPartialFee(fee);
+              setIsFeeEstimated(true); // Set the flag to true after estimating the fee
+            } else {
+              console.log("Fee has already been estimated, skipping re-estimation.");
+            }
           } else {
             console.error("Invalid fee response:", event.data);
           }
@@ -194,6 +193,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             showConfirmButton: false,
           }).then(() => {
             setIsTransferVisible(false);
+            setIsTransferInProgress(false); // Reset transfer state
             window.location.reload();
           });
           break;
@@ -206,6 +206,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
             timerProgressBar: true,
             showConfirmButton: false,
           });
+          setIsTransferInProgress(false); // Reset transfer state
           break;
         default:
           break;
@@ -255,7 +256,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
   };
 
   const fixBalanceReverse = (value: string, decimal: number = 12): string => {
-    return (BigInt(value) * BigInt(10 ** decimal)).toString();
+    const floatValue = parseFloat(value);
+    const integralValue = Math.round(floatValue * Math.pow(10, decimal));
+    return BigInt(integralValue).toString();
   };
 
   const handleEstimateFee = () => {
@@ -286,6 +289,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     };
 
     const formattedAmount = fixBalanceReverse(amount);
+    console.log(`[XteriumWallet] Converted value: ${amount} -> ${formattedAmount}`);
 
     window.postMessage(
       {
@@ -298,21 +302,16 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       "*"
     );
   };
-
   useEffect(() => {
-    if (recipient && amount && token && window.xterium) {
+    if (recipient && amount && token && window.xterium && !isTransferInProgress) {
       if (!window.xterium.connectedWallet) {
         console.error("No connected wallet available for fee estimation.");
         return;
       }
 
-      if (!partialFee) {
-        // ✅ Prevents duplicate estimations
-        console.log("🔄 Estimating fee...");
-        handleEstimateFee();
-      }
+      handleEstimateFee();
     }
-  }, [recipient, amount, token, tokenList]);
+  }, [recipient, amount, token, tokenList, isTransferInProgress]);
 
   useEffect(() => {
     if (window.xterium?.isConnected && tokenList.length === 0) {
@@ -340,7 +339,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
-        willClose: () => {},
+        willClose: () => { },
       });
     }
   };
@@ -359,25 +358,21 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       alert("No wallet connected. Please connect your wallet first.");
       return;
     }
+    setIsTransferInProgress(true); // Set transfer in progress
 
     const owner = window.xterium.connectedWallet.public_key;
-    const formattedAmount = fixBalanceReverse(amount, 12);
+    const formattedAmount = fixBalanceReverse(amount);
+    console.log("Transfer Details:", { token, owner, recipient, value: formattedAmount });
 
-    const transferDetails = {
-      token: { symbol: token },
-      owner,
-      recipient,
-      value: formattedAmount,
-      fee: partialFee, // ✅ Include the estimated fee
-    };
-
-    console.log("📩 Transfer Details Before Sending:", transferDetails);
-
-    // ✅ Send transaction request with fee included
     window.postMessage(
       {
         type: "XTERIUM_TRANSFER_REQUEST",
-        payload: transferDetails,
+        payload: {
+          token: { symbol: token },
+          owner,
+          recipient,
+          value: formattedAmount,
+        },
       },
       "*"
     );
@@ -612,9 +607,8 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
               <div className="flex justify-between">
                 <button
                   type="submit"
-                  className={`inject-button ${
-                    !partialFee ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`inject-button ${!partialFee ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={!partialFee}
                 >
                   Transfer
