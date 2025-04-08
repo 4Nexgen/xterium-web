@@ -15,11 +15,6 @@ type Token = {
   description: string;
 };
 
-type WalletData = {
-  public_key: string;
-  name?: string;
-};
-
 type XteriumWalletProps = {
   setConnectedWallet: React.Dispatch<React.SetStateAction<Wallet | null>>;
 };
@@ -117,7 +112,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     if (connectedWallet) {
       window.postMessage(
         {
-          type: "XTERIUM_GET_WALLET_BALANCE",
+          type: "XTERIUM_ALL_BALANCES_RESPONSE",
           publicKey: connectedWallet.public_key,
         },
         "*"
@@ -132,7 +127,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
       switch (event.data.type) {
         case "XTERIUM_WALLETS_RESPONSE":
           try {
-            let wallets: WalletData[] = event.data.wallets;
+            let wallets: Wallet[] = event.data.wallets;
             if (typeof wallets === "string") {
               wallets = JSON.parse(wallets);
             }
@@ -193,6 +188,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
               const fee = event.data.substrateFee.partialFee;
               setPartialFee(fee);
               setIsFeeEstimated(true);
+              console.log("Estimated Fee:", fee);
             }
           } else {
             console.error("Invalid fee response:", event.data);
@@ -223,7 +219,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           });
           setIsTransferInProgress(false);
           break;
-        case "XTERIUM_BALANCE_RESPONSE":
+        case "XTERIUM_ALL_BALANCES_RESPONSE":
           if (event.data.error) {
             console.error("Error fetching wallet balance:", event.data.error);
           } else {
@@ -483,13 +479,32 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
     setIsTransferInProgress(true);
 
+    const tokenDetails = tokenList.find(
+      (t) => t.symbol === token.trim().toUpperCase()
+    );
+
+    if (!tokenDetails) {
+      console.error(`Token "${token}" not found in token list.`);
+      Swal.fire({
+        title: "Error",
+        text: `Token "${token}" not found. Please check the symbol and try again.`,
+        icon: "error",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    console.log("Token Details:", tokenDetails);
+
     const formattedAmountForTransfer = fixBalanceReverse(amount);
 
     window.postMessage(
       {
         type: "XTERIUM_TRANSFER_REQUEST",
         payload: {
-          token: { symbol: token },
+          token: tokenDetails,
           owner,
           recipient,
           value: formattedAmountForTransfer,
