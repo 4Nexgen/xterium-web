@@ -163,7 +163,7 @@ export default function HomePage() {
       <section className="bg-black max-h-screen text-white relative unbounded overflow-hidden">
         <div className="py-16 container mx-auto flex gap-8">
           <div className="flex-1 mx-4">
-            <h3 className="text-white text-lg mb-8 mx-2 text-left xs:text-center">
+            <h3 className="text-white text-lg mb-8 text-left xs:text-center">
               Getting Started with Xterium Wallet
             </h3>
 
