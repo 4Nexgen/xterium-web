@@ -17,6 +17,12 @@
   }
 }
 
+.unbounded {
+  font-family: "Unbounded", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
 body {
   @apply m-0 font-sans bg-background text-foreground;
 }
