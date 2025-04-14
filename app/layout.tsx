@@ -29,11 +29,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
       </head>
       <body
-        className="bg-no-repeat"
+        className="bg-no-repeat bg-top bg-[length:200%_auto] md:bg-[length:100%_auto]"
         style={{
           backgroundImage: "url('/assets/xterium_bg-05.png')",
-          backgroundPosition: "top",
-          backgroundSize: "100% auto",
         }}
       >
         <div className="lg:w-[100%] sm:w-[50%] mx-auto">

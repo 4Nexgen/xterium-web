@@ -16,11 +16,11 @@ export default function HomePage() {
           }}
         >
           <div className="z-20 container mx-auto text-center flex flex-col justify-center items-center pt-16 h-full">
-            <h1 className="text-[4em] leading-tight mb-6 text-white unbounded">
+            <h1 className="text-[2em] md:text-[4em] leading-tight mb-6 text-white unbounded">
               Your Gateway to <span className="text-[#50e8e3]">Blockchain</span>
             </h1>
 
-            <div className="text-center mt-8 flex justify-center unbounded">
+            <div className="text-center mt-8 flex justify-center unbounded px-4 text-xs md:text-md">
               <h2 className="text-white max-w-[900px]">
                 Secure, seamless, and powerful. The Xterium Wallet Extension is
                 your trusted companion for managing digital assets and
@@ -39,7 +39,7 @@ export default function HomePage() {
         </div>
       </section>
       <section
-        className="py-16 bg-no-repeat bg-cover h-[500px] mt-10 relative"
+        className="py-4 md:py-16 bg-no-repeat bg-cover h-[500px] mt-10 relative"
         style={{
           backgroundImage: "url('/assets/layered-bg-white.png')",
           backgroundPosition: "top",
@@ -48,16 +48,16 @@ export default function HomePage() {
         <img
           src="/assets/phone.png"
           alt=""
-          className="absolute right-0 bottom-0 h-[400px]"
+          className="absolute right-0 bottom-0 h-[400px] hidden md:block"
         />
-        <div className="container mx-4 z-10 absolute">
-          <div className="flex gap-4">
+        <div className="container md:mx-4 z-10 absolute">
+          <div className="flex flex-col md:flex-row gap-4">
             <h3 className="flex-1 text-white text-lg mb-8 mx-4 uppercase unbounded">
               Why Choose{" "}
               <span className="text-[#07bab4] text-3xl">Xterium</span> Wallet?
             </h3>
-            <ul className="w-[500px]">
-              <li className="p-4 flex items-center gap-4 unbounded">
+            <ul className="w-full md:w-[500px]">
+              <li className="p-2 md:p-4 flex items-center gap-4 unbounded justify-end md:justify-start">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -80,7 +80,7 @@ export default function HomePage() {
                   you full control of your assets.
                 </p> */}
               </li>
-              <li className="p-4 flex items-center gap-4 unbounded">
+              <li className="p-2 md:p-4 flex items-center gap-4 unbounded justify-end md:justify-start">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -102,7 +102,7 @@ export default function HomePage() {
                   Easily manage tokens with just a few clicks.
                 </p> */}
               </li>
-              <li className="p-4 flex items-center gap-4 unbounded">
+              <li className="p-2 md:p-4 flex items-center gap-4 unbounded justify-end md:justify-start">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -125,7 +125,7 @@ export default function HomePage() {
                   contracts effortlessly.
                 </p> */}
               </li>
-              <li className="p-4 flex items-center gap-4 unbounded">
+              <li className="p-2 md:p-4 flex items-center gap-4 unbounded justify-end md:justify-start">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -160,9 +160,9 @@ export default function HomePage() {
         ></div>
       </section>
 
-      <section className="bg-black text-white relative unbounded">
+      <section className="bg-black max-h-screen text-white relative unbounded overflow-hidden">
         <div className="py-16 container mx-auto flex gap-8">
-          <div className="flex-1 mx-2">
+          <div className="flex-1 mx-4">
             <h3 className="text-white text-lg mb-8 mx-2 text-left xs:text-center">
               Getting Started with Xterium Wallet
             </h3>
