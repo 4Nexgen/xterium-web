@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <div>
+    <div className="unbounded">
       <div className="h-4 bg-gradient-to-r from-[#0eb4b2] to-[#10467b]"></div>
       <div className="bg-gray-800">
         <div className="container mx-auto text-white py-8">
