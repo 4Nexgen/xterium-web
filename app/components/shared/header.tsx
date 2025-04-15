@@ -19,14 +19,14 @@ export function Header() {
         </Link>
         <a
           href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
-          className="text-theme-default border-2 border-theme-default py-2 px-4 rounded-full text-xs font-bold uppercase flex items-center gap-2 -ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3"
+          className="unbounded text-white border-2 border-[#3c81ff] bg-[#3c81ff4a] py-2 px-4 rounded-full text-xs uppercase flex items-center gap-2 -ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="currentColor"
+            stroke="#82aeff"
             className="h-4 w-4"
           >
             <path

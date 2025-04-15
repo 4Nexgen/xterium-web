@@ -2,6 +2,7 @@ import React from "react";
 import WalletCreationSteps from "./components/shared/createWallet";
 import ImportWalletSteps from "./components/shared/importWallet";
 import TransferingTokenSteps from "./components/shared/transferringToken";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -30,15 +31,28 @@ export default function HomePage() {
             <div className="flex items-center justify-center gap-4 mt-10">
               <a
                 href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
-                className="text-white bg-gradient-to-br from-[#0eb4b2] to-[#10467b] py-4 px-6 rounded-full uppercase font-bold"
+                className="text-white py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
+                style={{
+                  backgroundImage: "url('/assets/button-bg-1.png')",
+                }}
               >
                 Download for Chrome
               </a>
+              <Link
+                href="#get-started-section"
+                className="text-white py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
+                style={{
+                  backgroundImage: "url('/assets/button-bg-2.png')",
+                }}
+              >
+                Learn More
+              </Link>
             </div>
           </div>
         </div>
       </section>
       <section
+        id="get-started-section"
         className="py-4 md:py-16 bg-no-repeat bg-cover h-[500px] mt-10 relative"
         style={{
           backgroundImage: "url('/assets/layered-bg-white.png')",
