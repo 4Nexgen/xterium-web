@@ -28,10 +28,10 @@ export default function HomePage() {
                 interacting with Blockchain--right from your browser.
               </h2>
             </div>
-            <div className="flex items-center justify-center gap-4 mt-10">
+            <div className="flex flex-col md:flex-row items-center justify-center md:gap-4 mt-10 w-full">
               <a
                 href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
-                className="text-white py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
+                className="text-white text-left py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
                 style={{
                   backgroundImage: "url('/assets/button-bg-1.png')",
                 }}
@@ -40,7 +40,7 @@ export default function HomePage() {
               </a>
               <Link
                 href="#get-started-section"
-                className="text-white py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
+                className="text-white text-left py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
                 style={{
                   backgroundImage: "url('/assets/button-bg-2.png')",
                 }}
@@ -52,7 +52,6 @@ export default function HomePage() {
         </div>
       </section>
       <section
-        id="get-started-section"
         className="py-4 md:py-16 bg-no-repeat bg-cover h-[500px] mt-10 relative"
         style={{
           backgroundImage: "url('/assets/layered-bg-white.png')",
@@ -208,6 +207,66 @@ export default function HomePage() {
           </div> */}
         </div>
       </section>
+
+      <section
+        id="get-started-section"
+        className="bg-white max-h-screen relative unbounded overflow-hidden px-4"
+      >
+        <div className="py-16 container mx-auto gap-8">
+          <h3 className="text-lg mb-8 text-left xs:text-center">
+            Download the Xterium App
+          </h3>
+          <div className="flex gap-4">
+            <div className="flex-1 hidden md:block">
+              <img
+                src="/phone-app.jpeg"
+                alt=""
+                className="block mx-auto h-[500px] rounded-xl"
+              />
+            </div>
+            <div className="flex-1 flex flex-col md:items-end md:text-right justify-center">
+              <h4 className="text-3xl my-8">
+                Seamless Blockchain Access <br />— Anytime, Anywhere
+              </h4>
+              <p className="text-sm my-4 font-bold">
+                Manage your digital assets and interact with the Xode ecosystem
+                through a secure, easy-to-use wallet designed for all your
+                devices.
+              </p>
+              <p className="text-xs my-4">
+                Whether you prefer browser or mobile, the Xterium Wallet has you
+                covered.
+              </p>
+              <div className="my-8 flex flex-col md:flex-row gap-4 justify-end w-full">
+                <a
+                  href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
+                  target="_blank"
+                  className="text-white bg-black py-4 px-8 rounded-[100px] flex items-center gap-4 flex-1"
+                >
+                  <img src="/logo-xtension.png" alt="" className="size-8" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-xs">Download for</span>Chrome
+                  </div>
+                </a>
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.xterium.wallet&pli=1"
+                  target="_blank"
+                  className="text-white bg-black py-4 px-8 rounded-[100px] flex items-center gap-4 flex-1"
+                >
+                  <img src="/logo-playstore.webp" alt="" className="size-8" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-xs">Download on</span>Play Store
+                  </div>
+                </a>
+              </div>
+              <p className="my-8 text-sm text-theme-default">
+                We’re bringing the full Xterium experience to iPhones soon.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div className="bg-black">
         <WalletCreationSteps />
         <ImportWalletSteps />
