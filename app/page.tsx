@@ -31,7 +31,7 @@ export default function HomePage() {
             <div className="flex flex-col md:flex-row items-center justify-center md:gap-4 mt-10 w-full">
               <a
                 href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
-                className="text-white text-left py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
+                className="text-white text-left py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px] text-center"
                 style={{
                   backgroundImage: "url('/assets/button-bg-1.png')",
                 }}
@@ -40,7 +40,7 @@ export default function HomePage() {
               </a>
               <Link
                 href="#get-started-section"
-                className="text-white text-left py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px]"
+                className="text-white text-left py-6 px-8 text-sm rounded-full uppercase bg-contain bg-no-repeat bg-center unbounded w-[300px] text-center"
                 style={{
                   backgroundImage: "url('/assets/button-bg-2.png')",
                 }}
@@ -173,7 +173,10 @@ export default function HomePage() {
         ></div>
       </section>
 
-      <section className="bg-black max-h-screen text-white relative unbounded overflow-hidden">
+      <section
+        id="get-started-section"
+        className="bg-black max-h-screen text-white relative unbounded overflow-hidden"
+      >
         <div className="py-16 container mx-auto flex gap-8">
           <div className="flex-1 mx-4">
             <h3 className="text-white text-lg mb-8 text-left xs:text-center">
@@ -209,7 +212,7 @@ export default function HomePage() {
       </section>
 
       <section
-        id="get-started-section"
+        id="download-section"
         className="bg-white max-h-screen relative unbounded overflow-hidden px-4"
       >
         <div className="py-16 container mx-auto gap-8">
@@ -241,7 +244,7 @@ export default function HomePage() {
                 <a
                   href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
                   target="_blank"
-                  className="text-white bg-black py-4 px-8 rounded-[100px] flex items-center gap-4 flex-1"
+                  className="text-white bg-black py-4 px-8 rounded-[100px] flex items-center gap-4 flex-1 justify-center"
                 >
                   <img src="/logo-xtension.png" alt="" className="size-8" />
                   <div className="flex flex-col items-start">
@@ -251,7 +254,7 @@ export default function HomePage() {
                 <a
                   href="https://play.google.com/store/apps/details?id=com.xterium.wallet&pli=1"
                   target="_blank"
-                  className="text-white bg-black py-4 px-8 rounded-[100px] flex items-center gap-4 flex-1"
+                  className="text-white bg-black py-4 px-8 rounded-[100px] flex items-center gap-4 flex-1 justify-center"
                 >
                   <img src="/logo-playstore.webp" alt="" className="size-8" />
                   <div className="flex flex-col items-start">
