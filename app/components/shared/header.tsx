@@ -17,8 +17,8 @@ export function Header() {
             className="mt-8 sm:mt-1 md:mt-2 lg:mt-2 absolute left-10 top-1/5 transform -translate-y-1/ sm:left-14 sm:top-1/4 md:left-14 md:top-1/5 lg:left-16 lg:top-1/4"
           />
         </Link>
-        <a
-          href="https://chromewebstore.google.com/detail/xterium/klfhdmiebenifpdmdmkjicdohjilabdg"
+        <Link
+          href="#download-section"
           className="unbounded text-white border-2 border-[#3c81ff] bg-[#3c81ff4a] py-2 px-4 rounded-full text-xs uppercase flex items-center gap-2 -ml-2 mx-2 md:mt-10 sm:mt-4 sm:gap-3"
         >
           <svg
@@ -36,7 +36,7 @@ export function Header() {
             />
           </svg>
           <span className="hidden sm:inline">Download</span>
-        </a>
+        </Link>
       </div>
     </nav>
   );
