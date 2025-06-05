@@ -5,6 +5,7 @@ import WalletCreationSteps from "./components/shared/createWallet";
 import ImportWalletSteps from "./components/shared/importWallet";
 import TransferingTokenSteps from "./components/shared/transferringToken";
 import XteriumWallet from "./components/shared/xterium-wallet";
+import DeepLinkPage from "./components/shared/deep-linking";
 
 type Wallet = {
   public_key: string;
@@ -13,9 +14,11 @@ type Wallet = {
 
 export default function HomePage() {
   const [connectedWallet, setConnectedWallet] = useState<Wallet | null>(null); // State to hold connected wallet information
-  
+
   useEffect(() => {
-    const savedConnectionState = localStorage.getItem("xterium_wallet_connection");
+    const savedConnectionState = localStorage.getItem(
+      "xterium_wallet_connection"
+    );
     if (savedConnectionState) {
       const connectionData = JSON.parse(savedConnectionState);
       if (connectionData.isConnected) {
@@ -29,26 +32,31 @@ export default function HomePage() {
       isConnected: !!connectedWallet,
       connectedWallet: connectedWallet,
     };
-    localStorage.setItem("xterium_wallet_connection", JSON.stringify(connectionData));
+    localStorage.setItem(
+      "xterium_wallet_connection",
+      JSON.stringify(connectionData)
+    );
   }, [connectedWallet]);
-  
+
   return (
     <div className="">
-      <section className="bg-no-repeat bg-cover relative" 
-        style={{ 
-          backgroundImage: "url('/assets/xterium_bg-09.png')" ,
+      <section
+        className="bg-no-repeat bg-cover relative"
+        style={{
+          backgroundImage: "url('/assets/xterium_bg-09.png')",
           backgroundSize: "cover",
           backgroundPosition: "top",
-          backgroundAttachment: "fixed"
-      }}>
+          backgroundAttachment: "fixed",
+        }}
+      >
         <div className="h-screen mx-2">
           <div className="z-20 container mx-auto text-center flex flex-col justify-center items-center pt-16 h-full">
-          <h1 className="text-[4em] leading-tight font-bold mb-6 text-white">
-            Your Gateway to{" "}
-            <span className="py-1 px-2 bg-white text-theme-default inline-block sm:py-2 sm:px-3">
-              Blockchain
-            </span>
-          </h1>
+            <h1 className="text-[4em] leading-tight font-bold mb-6 text-white">
+              Your Gateway to{" "}
+              <span className="py-1 px-2 bg-white text-theme-default inline-block sm:py-2 sm:px-3">
+                Blockchain
+              </span>
+            </h1>
 
             <div className="text-center mt-8 flex justify-center">
               <h2 className="text-white max-w-[700px]">
@@ -68,13 +76,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <DeepLinkPage />
       <XteriumWallet setConnectedWallet={setConnectedWallet} />
       <section className="py-6 bg-none flex justify-center items-center">
         <div className="container border-2 border-gray-300 rounded-lg p-2">
           <h3 className="uppercase font-bold text-lg mb-8 mx-4">
             Connected Wallet
           </h3>
-          <div className="bg-gray-100 p-4 rounded text-center"> 
+          <div className="bg-gray-100 p-4 rounded text-center">
             {connectedWallet ? (
               <p className="text-lg font-bold">
                 {connectedWallet.name}
@@ -85,7 +94,9 @@ export default function HomePage() {
                 </span>
               </p>
             ) : (
-              <p className="text-lg font-bold text-gray-500">No wallet connected</p>
+              <p className="text-lg font-bold text-gray-500">
+                No wallet connected
+              </p>
             )}
           </div>
         </div>
@@ -113,8 +124,8 @@ export default function HomePage() {
               </svg>
               <h4 className="mb-2 w-fit py-2">Secure Key Storage</h4>
               <p className="text-sm opacity-80">
-                Your private keys are encrypted and stored securely, giving you full
-                control of your assets.
+                Your private keys are encrypted and stored securely, giving you
+                full control of your assets.
               </p>
             </li>
             <li className="p-4 flex flex-col items-start border-l border-[#0fbab5]">
@@ -154,8 +165,8 @@ export default function HomePage() {
               </svg>
               <h4 className="mb-2 w-fit py-2">Smart Contract Interaction</h4>
               <p className="text-sm opacity-80">
-                Connect to decentralized applications and execute smart contracts
-                effortlessly.
+                Connect to decentralized applications and execute smart
+                contracts effortlessly.
               </p>
             </li>
             <li className="p-4 flex flex-col items-start border-t sm:border-t-0 lg:border-t-0 border-l border-[#0fbab5]">
@@ -182,52 +193,55 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-no-repeat bg-cover relative" 
-        style={{ 
+      <section
+        className="bg-no-repeat bg-cover relative"
+        style={{
           backgroundImage: "url('/assets/xterium_bg-09.png')",
           backgroundSize: "cover",
           backgroundPosition: "top",
-          backgroundAttachment: "fixed"
-        }}>
-      <div className="py-16 container mx-auto flex gap-8">
-        <div className="flex-1 mx-2">
-        <h3 className="text-theme-default uppercase font-bold text-lg mb-8 mx-2 text-left xs:text-center">
-          Getting Started with Xterium Wallet
-        </h3>
+          backgroundAttachment: "fixed",
+        }}
+      >
+        <div className="py-16 container mx-auto flex gap-8">
+          <div className="flex-1 mx-2">
+            <h3 className="text-theme-default uppercase font-bold text-lg mb-8 mx-2 text-left xs:text-center">
+              Getting Started with Xterium Wallet
+            </h3>
 
-
-          <ul className="flex flex-col gap-4">
-            <li className="bg-slate-50 rounded-xl py-4 px-8">
-              <h4 className="text-theme-default font-bold">
-                1. Download the Extension
-              </h4>
-              <p>Available for Chrome, Firefox, and more.</p>
-            </li>
-            <li className="bg-slate-50 rounded-xl py-4 px-8">
-              <h4 className="text-theme-default font-bold">
-                2. Create or Import a Wallet
-              </h4>
-              <p>Generate a new wallet or import your existing one securely.</p>
-            </li>
-            <li className="bg-slate-50 rounded-xl py-4 px-8">
-              <h4 className="text-theme-default font-bold">
-                3. Start Managing Your Digital Assets
-              </h4>
-              <p>
-                Access your tokens, send/receive tokens, and interact with Xode
-                dApps.
-              </p>
-            </li>
-          </ul>
-        </div>
-        {/* <div className="w-fit">
+            <ul className="flex flex-col gap-4">
+              <li className="bg-slate-50 rounded-xl py-4 px-8">
+                <h4 className="text-theme-default font-bold">
+                  1. Download the Extension
+                </h4>
+                <p>Available for Chrome, Firefox, and more.</p>
+              </li>
+              <li className="bg-slate-50 rounded-xl py-4 px-8">
+                <h4 className="text-theme-default font-bold">
+                  2. Create or Import a Wallet
+                </h4>
+                <p>
+                  Generate a new wallet or import your existing one securely.
+                </p>
+              </li>
+              <li className="bg-slate-50 rounded-xl py-4 px-8">
+                <h4 className="text-theme-default font-bold">
+                  3. Start Managing Your Digital Assets
+                </h4>
+                <p>
+                  Access your tokens, send/receive tokens, and interact with
+                  Xode dApps.
+                </p>
+              </li>
+            </ul>
+          </div>
+          {/* <div className="w-fit">
           <img src="/screen.png" alt="" className="w-[300px] rounded-xl" />
           </div> */}
-          </div>
+        </div>
       </section>
       <div className="bg-black">
-        <WalletCreationSteps/>
-        <ImportWalletSteps/>
+        <WalletCreationSteps />
+        <ImportWalletSteps />
         <TransferingTokenSteps />
       </div>
     </div>

@@ -10,9 +10,10 @@ type Wallet = {
 };
 
 type Token = {
+  id: string;
   type: string;
   symbol: string;
-  description: string;
+  name: string;
 };
 
 type XteriumWalletProps = {
@@ -78,7 +79,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
   const connectXteriumWallet = () => {
     setIsWalletLoading(true);
-    window.postMessage({ type: "XTERIUM_GET_WALLETS" }, "*");
+    window.postMessage({ type: "XTERIUM_GET_URL" }, "*");
   };
 
   const disconnectWallet = () => {
@@ -112,7 +113,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
     if (connectedWallet) {
       window.postMessage(
         {
-          type: "XTERIUM_ALL_BALANCES_RESPONSE",
+          type: "XTERIUM_GET_ALL_BALANCES",
           publicKey: connectedWallet.public_key,
         },
         "*"
@@ -205,7 +206,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
           }).then(() => {
             setIsTransferVisible(false);
             setIsTransferInProgress(false);
-            // window.location.reload();
+            window.location.reload();
           });
           break;
         case "XTERIUM_TRANSFER_FAILED":
@@ -500,9 +501,11 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
     const formattedAmountForTransfer = fixBalanceReverse(amount);
 
+    console.log("Amount", formattedAmountForTransfer);
+
     window.postMessage(
       {
-        type: "XTERIUM_TRANSFER_REQUEST",
+        type: "XTERIUM_UI_TRANSFER_REQUEST",
         payload: {
           token: tokenDetails,
           owner,
@@ -536,6 +539,7 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
 
   return (
     <div className="">
+      <a href="xterium://balance">Open in App (Android)</a>
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 mt-10">
         <ul className="flex flex-col md:flex-row items-center w-full md:w-auto space-y-4 md:space-y-0 md:space-x-4">
           <li className="w-full md:w-auto cursor-pointer">
@@ -596,6 +600,9 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                 </button>
               </div>
               <div className="p-10">
+                {/* <button onClick={saveWebsite} disabled={isWalletLoading}>
+                  {isWalletLoading ? "Saving..." : "Save Website"}
+                </button> */}
                 <h2 className="text-2xl font-bold text-center mb-6">
                   Connect Your Wallet
                 </h2>
@@ -733,8 +740,8 @@ const XteriumWallet: React.FC<XteriumWalletProps> = ({
                     <option disabled>🔄 Loading tokens...</option>
                   ) : (
                     tokenList.map((t) => (
-                      <option key={t.symbol} value={t.symbol}>
-                        {t.symbol} ({t.description})
+                      <option key={t.id} value={t.symbol}>
+                        {t.symbol} ({t.name})
                       </option>
                     ))
                   )}
