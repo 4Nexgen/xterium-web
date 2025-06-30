@@ -222,7 +222,7 @@ export default function HomePage() {
           <div className="flex gap-4">
             <div className="flex-1 hidden md:block">
               <img
-                src="/phone-app.jpeg"
+                src="/xterium-mobile.png"
                 alt=""
                 className="block mx-auto h-[500px] rounded-xl"
               />
@@ -261,10 +261,18 @@ export default function HomePage() {
                     <span className="text-xs">Download on</span>Play Store
                   </div>
                 </a>
+                <a
+                  href="https://apps.apple.com/ph/app/xterium/id6745164228"
+                  target="_blank"
+                  className="text-white bg-black py-4 px-8 rounded-[100px] flex items-center gap-4 flex-1 justify-center"
+                >
+                  <img src="/apple.png" alt="" className="size-8" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-xs">Download on</span>App Store
+                  </div>
+                </a>
               </div>
-              <p className="my-8 text-sm text-theme-default">
-                We’re bringing the full Xterium experience to iPhones soon.
-              </p>
+      
             </div>
           </div>
         </div>
