@@ -222,7 +222,7 @@ export default function HomePage() {
           <div className="flex gap-4">
             <div className="flex-1 hidden md:block">
               <img
-                src="/xterium-mobile.png"
+                src="/mobile-view.png"
                 alt=""
                 className="block mx-auto h-[500px] rounded-xl"
               />
